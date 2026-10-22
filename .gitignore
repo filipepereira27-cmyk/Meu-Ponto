@@ -1,7 +1,7 @@
-.build/
-.swiftpm/
-DerivedData/
-xcuserdata/
-*.xcuserstate
+node_modules/
+dist/
+public/ocr/
+test-results/
+playwright-report/
+*.tar.gz
 .DS_Store
-MeuPontoDigital.tar.gz
