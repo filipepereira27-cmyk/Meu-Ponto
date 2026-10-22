@@ -42,6 +42,12 @@ public struct TicketFilter: Hashable, Codable, Sendable {
     }
 
     public func matches(_ record: TicketRecord) -> Bool {
+        matches(record, searchableText: nil)
+    }
+
+    /// Variante com o texto pesquisável já calculado (`searchableText(for:)`), para listas grandes
+    /// em que o app guarda esse texto em cache entre buscas.
+    public func matches(_ record: TicketRecord, searchableText cached: String?) -> Bool {
         if dateFrom != nil || dateTo != nil || month != nil {
             guard let date = record.recordDate else { return false }
             if let dateFrom, date < dateFrom { return false }
@@ -67,7 +73,7 @@ public struct TicketFilter: Hashable, Codable, Sendable {
         if onlyFlagged, !record.isFlagged { return false }
         if onlyPendingReview, record.isConfirmed { return false }
         if !text.trimmingCharacters(in: .whitespaces).isEmpty {
-            let haystack = Self.searchableText(for: record)
+            let haystack = cached ?? Self.searchableText(for: record)
             for token in Self.queryTokens(text) where !haystack.contains(token) { return false }
         }
         return true

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Início</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+a{color:#136CA3}a:hover{color:#0d4f78}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F2F2F7; font-family: -apple-system, system-ui, 'Helvetica Neue', Arial, sans-serif; color: #1c1c1e; display: flex; flex-direction: column; position: relative; overflow: hidden">
+<div style="padding: 24px 16px 0 16px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<h1 style="margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -0.5px">Meu Ponto Digital</h1>
+<button aria-label="Calendário" style="width: 44px; height: 44px; border: none; background: transparent; color: #136CA3; padding: 0">
+<svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+</button>
+</div>
+<label style="display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 12px; padding: 12px; color: #6b6b70; font-size: 16px">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+<input aria-label="Buscar" placeholder="Buscar por data, horário ou texto" style="border: none; outline: none; font-size: 16px; flex-grow: 1; background: transparent; font-family: inherit">
+</label>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<div style="background: #fff; border-radius: 16px; padding: 14px">
+<div style="font-size: 34px; font-weight: 700">148</div>
+<div style="font-size: 13px; color: #5c5c61">tickets arquivados</div>
+</div>
+<div style="background: #fff; border-radius: 16px; padding: 14px">
+<div style="font-size: 34px; font-weight: 700; color: #b35900">3</div>
+<div style="font-size: 13px; color: #5c5c61">para revisar</div>
+</div>
+</div>
+<div style="background: #fff; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 17px; font-weight: 600">Precisa da sua atenção</div>
+<div style="display: flex; justify-content: space-between; font-size: 15px"><span>3 tickets com revisão pendente</span><span style="color: #8e8e93">›</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 15px"><span>1 possível duplicidade</span><span style="color: #8e8e93">›</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 15px; color: #b35900"><span>Último backup há mais de 7 dias</span><span style="color: #8e8e93">›</span></div>
+</div>
+<div style="background: #fff; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 17px; font-weight: 600">Adicionados recentemente</div>
+<div style="display: flex; gap: 12px; align-items: center">
+<div style="width: 48px; height: 48px; border-radius: 8px; background: #e5e5ea"></div>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<div><span style="font-size: 19px; font-weight: 600">17:32</span> <span style="font-size: 14px; color: #5c5c61">22/10/2026</span></div>
+<span style="font-size: 12px; font-weight: 600; color: #1f5fa8; background: #e3eefb; border-radius: 10px; padding: 2px 8px; align-self: flex-start">Saída</span>
+</div>
+</div>
+<div style="display: flex; gap: 12px; align-items: center">
+<div style="width: 48px; height: 48px; border-radius: 8px; background: #e5e5ea"></div>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<div><span style="font-size: 19px; font-weight: 600">08:01</span> <span style="font-size: 14px; color: #5c5c61">22/10/2026</span></div>
+<span style="font-size: 12px; font-weight: 600; color: #1d6b34; background: #e2f4e7; border-radius: 10px; padding: 2px 8px; align-self: flex-start">Entrada</span>
+</div>
+</div>
+</div>
+</div>
+<div style="background: rgba(249,249,249,0.96); border-top: 1px solid #d8d8dc; padding: 10px 16px; display: flex; flex-direction: column; gap: 10px">
+<button style="height: 54px; border: none; border-radius: 14px; background: #136CA3; color: #fff; font-size: 19px; font-weight: 600; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 10px">
+<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+Fotografar ticket</button>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<button style="height: 46px; border: none; border-radius: 12px; background: #e3eefb; color: #136CA3; font-size: 16px; font-weight: 600; font-family: inherit">Importar foto</button>
+<button style="height: 46px; border: none; border-radius: 12px; background: #e3eefb; color: #136CA3; font-size: 16px; font-weight: 600; font-family: inherit">Arquivos</button>
+</div>
+</div>
+<nav style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 8px 0 22px 0; background: rgba(249,249,249,0.96); border-top: 1px solid #d8d8dc; font-size: 10px; text-align: center; color: #6b6b70">
+<span style="color: #136CA3; font-weight: 600">Início</span><span>Arquivo</span><span>Calendário</span><span>Jornada</span><span>Ajustes</span>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

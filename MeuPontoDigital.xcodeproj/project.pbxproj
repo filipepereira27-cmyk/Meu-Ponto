@@ -1,0 +1,678 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		019FA85F46E8EA0E0652294B /* TicketDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D7767339DB0B034F47DF3E /* TicketDraft.swift */; };
+		0621181E9CBAA125249AB50D /* AnalysisView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EA128C77DDC4A92E4F9393 /* AnalysisView.swift */; };
+		123F40FB121FBB4AD2F52AED /* ImageEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 978988728169DBBB3F6266FA /* ImageEditorView.swift */; };
+		1B4DEDF64F812EE44CDFFD31 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9252C88A5A1B8CD659119FD /* AppSettings.swift */; };
+		37FAE5253BE0E6C92853EDA3 /* ImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F816C80F4F152803E5BC5C9 /* ImageStore.swift */; };
+		3B8FFB80793A8FA3EA6875C0 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA37D4E5B610C3C5018271D /* Components.swift */; };
+		3FA5EC9922249846DA9940A1 /* ImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7291126F7FC0ED531BD7BAA /* ImageProcessing.swift */; };
+		702BD7EC2ABAE413F75E4C6A /* BackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F3470FC1516DA44D2A6C87 /* BackupView.swift */; };
+		71C40748D377408F82A857A9 /* BackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 283EA7062FCEE20589631BBF /* BackupService.swift */; };
+		7402C865C06E6F39773945D3 /* CalendarScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 174C63E33762200FA128BC07 /* CalendarScreen.swift */; };
+		81D2E5D6BA62D67F54752772 /* MeuPontoDigitalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8231A790CD507BA6625D6AB /* MeuPontoDigitalApp.swift */; };
+		844FEC8145B1D597C57A7D72 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34B497F7FFE5A86D758D67B7 /* PersistenceTests.swift */; };
+		8A44E9B06EB65DDAF5A59B6A /* PontoCore in Frameworks */ = {isa = PBXBuildFile; productRef = 22889188012D58D8F1B8313E /* PontoCore */; };
+		9C4260930707B6662713DA91 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 917695152BD4C9237CA57E27 /* PrivacyInfo.xcprivacy */; };
+		A0927F1D7F9E20E6BD1AB44D /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1A1679275DD67651112E4D /* AppLock.swift */; };
+		A4DEACF707E9722264F6582E /* Ticket+Record.swift in Sources */ = {isa = PBXBuildFile; fileRef = 279695B060BD314943B5991F /* Ticket+Record.swift */; };
+		A7625568A696776B8FA1DD1B /* TicketFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D291E2E8257E297E2C1679D1 /* TicketFormView.swift */; };
+		ADF02B2ED75775E56A2230E6 /* CaptureSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 908FA4D58BF8D318D6966AB2 /* CaptureSources.swift */; };
+		B34E80B6B271B2488EEA42AF /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FF65A4837A7F44941C9644E /* ExportService.swift */; };
+		B7B2C9AD9E4C5E953F3D5317 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C60E7F42536F0DA9E6542D31 /* OCRService.swift */; };
+		B94CCEE30660CA7E63A2F0DA /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E3CE9298C7CEC8206E9A912 /* HomeView.swift */; };
+		BAED462432BE82F30AFABBD3 /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541E7D67EF2F4853789AA6CE /* Schema.swift */; };
+		BB624EEFB0E597713BD81887 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D00075B098217546BE638A6D /* Assets.xcassets */; };
+		CC5B85ED177A5403F37C166E /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 625083C8B56FE0FF78320169 /* RootView.swift */; };
+		D31EC3B40C543BD9FBE7D2C0 /* TicketDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA2E60D2DF76911EA964C86 /* TicketDetailView.swift */; };
+		DC36E5C0D34E263F01EFFEF6 /* PrivacyViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEADCFA7EF18C9BA6476A06 /* PrivacyViews.swift */; };
+		E11A3D5835F59E10AC9D5185 /* OCRPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 081721C405C70625CF2F41C4 /* OCRPipelineTests.swift */; };
+		E20F60DBD60683A44E7DF6E3 /* PontoCore in Frameworks */ = {isa = PBXBuildFile; productRef = 306A95115FDF001D25E29147 /* PontoCore */; };
+		E4855FC8E3CACAF66779591A /* ArchiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBCD18B6F83DEB57A0C842F /* ArchiveView.swift */; };
+		EAAFD9D30C44AF7997C57750 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22428C83A181BAABF220F08 /* SettingsView.swift */; };
+		F62D4564154C2E53C98BA2AD /* CaptureFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4C52C647AEBAFB980261E4C /* CaptureFlowView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F765B9548216AE9FA719BE13 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4CB1AEE4380729609AE50ED0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7D0131A4BE701E0AFDEFFCAA;
+			remoteInfo = MeuPontoDigital;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		04EA128C77DDC4A92E4F9393 /* AnalysisView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisView.swift; sourceTree = "<group>"; };
+		06CB8413C751FFAE7104277C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		081721C405C70625CF2F41C4 /* OCRPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRPipelineTests.swift; sourceTree = "<group>"; };
+		174C63E33762200FA128BC07 /* CalendarScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarScreen.swift; sourceTree = "<group>"; };
+		189DC1A62FE3B07BAE5CB5EC /* PontoCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PontoCore; path = PontoCore; sourceTree = SOURCE_ROOT; };
+		1DA2E60D2DF76911EA964C86 /* TicketDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketDetailView.swift; sourceTree = "<group>"; };
+		279695B060BD314943B5991F /* Ticket+Record.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Ticket+Record.swift"; sourceTree = "<group>"; };
+		283EA7062FCEE20589631BBF /* BackupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupService.swift; sourceTree = "<group>"; };
+		31D7767339DB0B034F47DF3E /* TicketDraft.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketDraft.swift; sourceTree = "<group>"; };
+		34B497F7FFE5A86D758D67B7 /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
+		3BEADCFA7EF18C9BA6476A06 /* PrivacyViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyViews.swift; sourceTree = "<group>"; };
+		3EA37D4E5B610C3C5018271D /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		4CBCD18B6F83DEB57A0C842F /* ArchiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchiveView.swift; sourceTree = "<group>"; };
+		541E7D67EF2F4853789AA6CE /* Schema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
+		5E3CE9298C7CEC8206E9A912 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		625083C8B56FE0FF78320169 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		6FF65A4837A7F44941C9644E /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		730C320E804E75C489A32744 /* MeuPontoDigitalTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = MeuPontoDigitalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		74F3470FC1516DA44D2A6C87 /* BackupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupView.swift; sourceTree = "<group>"; };
+		8F816C80F4F152803E5BC5C9 /* ImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStore.swift; sourceTree = "<group>"; };
+		908FA4D58BF8D318D6966AB2 /* CaptureSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSources.swift; sourceTree = "<group>"; };
+		917695152BD4C9237CA57E27 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		978988728169DBBB3F6266FA /* ImageEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageEditorView.swift; sourceTree = "<group>"; };
+		A22428C83A181BAABF220F08 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AE1A1679275DD67651112E4D /* AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLock.swift; sourceTree = "<group>"; };
+		C4C52C647AEBAFB980261E4C /* CaptureFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureFlowView.swift; sourceTree = "<group>"; };
+		C60E7F42536F0DA9E6542D31 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
+		C7291126F7FC0ED531BD7BAA /* ImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageProcessing.swift; sourceTree = "<group>"; };
+		D00075B098217546BE638A6D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D291E2E8257E297E2C1679D1 /* TicketFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketFormView.swift; sourceTree = "<group>"; };
+		DC07AE502F971F79C5DB5043 /* MeuPontoDigital.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MeuPontoDigital.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F8231A790CD507BA6625D6AB /* MeuPontoDigitalApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeuPontoDigitalApp.swift; sourceTree = "<group>"; };
+		F9252C88A5A1B8CD659119FD /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9B65C3E0F38F47FB34571F45 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A44E9B06EB65DDAF5A59B6A /* PontoCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B782C2708BC51B75E25EA645 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E20F60DBD60683A44E7DF6E3 /* PontoCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		075E0EF212D0F654C2A39355 /* Archive */ = {
+			isa = PBXGroup;
+			children = (
+				4CBCD18B6F83DEB57A0C842F /* ArchiveView.swift */,
+			);
+			path = Archive;
+			sourceTree = "<group>";
+		};
+		3D002DDDABF6A067DEDF7B00 /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				C4C52C647AEBAFB980261E4C /* CaptureFlowView.swift */,
+				908FA4D58BF8D318D6966AB2 /* CaptureSources.swift */,
+				978988728169DBBB3F6266FA /* ImageEditorView.swift */,
+				31D7767339DB0B034F47DF3E /* TicketDraft.swift */,
+				D291E2E8257E297E2C1679D1 /* TicketFormView.swift */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
+		427393EDD21A1BAF7C3E308B /* App */ = {
+			isa = PBXGroup;
+			children = (
+				06CB8413C751FFAE7104277C /* Info.plist */,
+				F8231A790CD507BA6625D6AB /* MeuPontoDigitalApp.swift */,
+				B6E8CD9F47D3E701F03F8254 /* Models */,
+				43165F154FD249D2315D7281 /* Resources */,
+				B72CA561CB5E3D3163643F90 /* Services */,
+				B687999E0EEA9FE2A5FE2AAE /* Views */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		43165F154FD249D2315D7281 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D00075B098217546BE638A6D /* Assets.xcassets */,
+				917695152BD4C9237CA57E27 /* PrivacyInfo.xcprivacy */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		5A44513C058203D156B21AB9 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				3EA37D4E5B610C3C5018271D /* Components.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		6AA16BCC6F21238D2FDC6422 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				189DC1A62FE3B07BAE5CB5EC /* PontoCore */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		A3100ADD5B3B8886F1192270 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				5E3CE9298C7CEC8206E9A912 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		AAB78CFBACD6A0B0B8B89515 /* Calendar */ = {
+			isa = PBXGroup;
+			children = (
+				174C63E33762200FA128BC07 /* CalendarScreen.swift */,
+			);
+			path = Calendar;
+			sourceTree = "<group>";
+		};
+		AFF08C89FAE53C3E50E462E2 = {
+			isa = PBXGroup;
+			children = (
+				427393EDD21A1BAF7C3E308B /* App */,
+				D0B900A166C7310349ED77C9 /* AppTests */,
+				6AA16BCC6F21238D2FDC6422 /* Packages */,
+				FF727C3652A9FA1EC4A39FE4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B687999E0EEA9FE2A5FE2AAE /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				625083C8B56FE0FF78320169 /* RootView.swift */,
+				E3CC4F1C18DC021A1C8F25FD /* Analysis */,
+				075E0EF212D0F654C2A39355 /* Archive */,
+				AAB78CFBACD6A0B0B8B89515 /* Calendar */,
+				3D002DDDABF6A067DEDF7B00 /* Capture */,
+				5A44513C058203D156B21AB9 /* Components */,
+				C87047BCFE1FC72D4F0CADB3 /* Detail */,
+				A3100ADD5B3B8886F1192270 /* Home */,
+				CE0779A7238011230E84BE20 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B6E8CD9F47D3E701F03F8254 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				541E7D67EF2F4853789AA6CE /* Schema.swift */,
+				279695B060BD314943B5991F /* Ticket+Record.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		B72CA561CB5E3D3163643F90 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				AE1A1679275DD67651112E4D /* AppLock.swift */,
+				F9252C88A5A1B8CD659119FD /* AppSettings.swift */,
+				283EA7062FCEE20589631BBF /* BackupService.swift */,
+				6FF65A4837A7F44941C9644E /* ExportService.swift */,
+				C7291126F7FC0ED531BD7BAA /* ImageProcessing.swift */,
+				8F816C80F4F152803E5BC5C9 /* ImageStore.swift */,
+				C60E7F42536F0DA9E6542D31 /* OCRService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C87047BCFE1FC72D4F0CADB3 /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				1DA2E60D2DF76911EA964C86 /* TicketDetailView.swift */,
+			);
+			path = Detail;
+			sourceTree = "<group>";
+		};
+		CE0779A7238011230E84BE20 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				74F3470FC1516DA44D2A6C87 /* BackupView.swift */,
+				3BEADCFA7EF18C9BA6476A06 /* PrivacyViews.swift */,
+				A22428C83A181BAABF220F08 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		D0B900A166C7310349ED77C9 /* AppTests */ = {
+			isa = PBXGroup;
+			children = (
+				081721C405C70625CF2F41C4 /* OCRPipelineTests.swift */,
+				34B497F7FFE5A86D758D67B7 /* PersistenceTests.swift */,
+			);
+			path = AppTests;
+			sourceTree = "<group>";
+		};
+		E3CC4F1C18DC021A1C8F25FD /* Analysis */ = {
+			isa = PBXGroup;
+			children = (
+				04EA128C77DDC4A92E4F9393 /* AnalysisView.swift */,
+			);
+			path = Analysis;
+			sourceTree = "<group>";
+		};
+		FF727C3652A9FA1EC4A39FE4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DC07AE502F971F79C5DB5043 /* MeuPontoDigital.app */,
+				730C320E804E75C489A32744 /* MeuPontoDigitalTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		64939D37DD49024041559260 /* MeuPontoDigitalTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 97E27646ED1E0B28C5BEF964 /* Build configuration list for PBXNativeTarget "MeuPontoDigitalTests" */;
+			buildPhases = (
+				A9888D37CCDE2C765222C081 /* Sources */,
+				9B65C3E0F38F47FB34571F45 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3A7046CEE47DE82D673317B9 /* PBXTargetDependency */,
+			);
+			name = MeuPontoDigitalTests;
+			packageProductDependencies = (
+				22889188012D58D8F1B8313E /* PontoCore */,
+			);
+			productName = MeuPontoDigitalTests;
+			productReference = 730C320E804E75C489A32744 /* MeuPontoDigitalTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		7D0131A4BE701E0AFDEFFCAA /* MeuPontoDigital */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9E23E01F2A6293612EBCB7B2 /* Build configuration list for PBXNativeTarget "MeuPontoDigital" */;
+			buildPhases = (
+				EBA393DD2A7688CB93C334BD /* Sources */,
+				708327359655E2AD51443FE0 /* Resources */,
+				B782C2708BC51B75E25EA645 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MeuPontoDigital;
+			packageProductDependencies = (
+				306A95115FDF001D25E29147 /* PontoCore */,
+			);
+			productName = MeuPontoDigital;
+			productReference = DC07AE502F971F79C5DB5043 /* MeuPontoDigital.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4CB1AEE4380729609AE50ED0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					64939D37DD49024041559260 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					7D0131A4BE701E0AFDEFFCAA = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = A105EE635ADDAD12511DA2F0 /* Build configuration list for PBXProject "MeuPontoDigital" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = "pt-BR";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				"pt-BR",
+			);
+			mainGroup = AFF08C89FAE53C3E50E462E2;
+			packageReferences = (
+				4ADD2878712C94CC7E4F8CF7 /* XCLocalSwiftPackageReference "PontoCore" */,
+			);
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7D0131A4BE701E0AFDEFFCAA /* MeuPontoDigital */,
+				64939D37DD49024041559260 /* MeuPontoDigitalTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		708327359655E2AD51443FE0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB624EEFB0E597713BD81887 /* Assets.xcassets in Resources */,
+				9C4260930707B6662713DA91 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A9888D37CCDE2C765222C081 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E11A3D5835F59E10AC9D5185 /* OCRPipelineTests.swift in Sources */,
+				844FEC8145B1D597C57A7D72 /* PersistenceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBA393DD2A7688CB93C334BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0621181E9CBAA125249AB50D /* AnalysisView.swift in Sources */,
+				A0927F1D7F9E20E6BD1AB44D /* AppLock.swift in Sources */,
+				1B4DEDF64F812EE44CDFFD31 /* AppSettings.swift in Sources */,
+				E4855FC8E3CACAF66779591A /* ArchiveView.swift in Sources */,
+				71C40748D377408F82A857A9 /* BackupService.swift in Sources */,
+				702BD7EC2ABAE413F75E4C6A /* BackupView.swift in Sources */,
+				7402C865C06E6F39773945D3 /* CalendarScreen.swift in Sources */,
+				F62D4564154C2E53C98BA2AD /* CaptureFlowView.swift in Sources */,
+				ADF02B2ED75775E56A2230E6 /* CaptureSources.swift in Sources */,
+				3B8FFB80793A8FA3EA6875C0 /* Components.swift in Sources */,
+				B34E80B6B271B2488EEA42AF /* ExportService.swift in Sources */,
+				B94CCEE30660CA7E63A2F0DA /* HomeView.swift in Sources */,
+				123F40FB121FBB4AD2F52AED /* ImageEditorView.swift in Sources */,
+				3FA5EC9922249846DA9940A1 /* ImageProcessing.swift in Sources */,
+				37FAE5253BE0E6C92853EDA3 /* ImageStore.swift in Sources */,
+				81D2E5D6BA62D67F54752772 /* MeuPontoDigitalApp.swift in Sources */,
+				B7B2C9AD9E4C5E953F3D5317 /* OCRService.swift in Sources */,
+				DC36E5C0D34E263F01EFFEF6 /* PrivacyViews.swift in Sources */,
+				CC5B85ED177A5403F37C166E /* RootView.swift in Sources */,
+				BAED462432BE82F30AFABBD3 /* Schema.swift in Sources */,
+				EAAFD9D30C44AF7997C57750 /* SettingsView.swift in Sources */,
+				A4DEACF707E9722264F6582E /* Ticket+Record.swift in Sources */,
+				D31EC3B40C543BD9FBE7D2C0 /* TicketDetailView.swift in Sources */,
+				019FA85F46E8EA0E0652294B /* TicketDraft.swift in Sources */,
+				A7625568A696776B8FA1DD1B /* TicketFormView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3A7046CEE47DE82D673317B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7D0131A4BE701E0AFDEFFCAA /* MeuPontoDigital */;
+			targetProxy = F765B9548216AE9FA719BE13 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		3FAD3793C4ED7BEB47342F4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.meupontodigital.app;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		749E94CA67338AC4DAEFC90B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		93407BA967481CA699D7F933 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.meupontodigital.app.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MeuPontoDigital.app/MeuPontoDigital";
+			};
+			name = Release;
+		};
+		B23CF62208DC482642840E66 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.meupontodigital.app;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		B52C31D7BA2A596E4FFD64C8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = br.com.meupontodigital.app.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MeuPontoDigital.app/MeuPontoDigital";
+			};
+			name = Debug;
+		};
+		C88B860E098A56D4AEF6B326 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		97E27646ED1E0B28C5BEF964 /* Build configuration list for PBXNativeTarget "MeuPontoDigitalTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B52C31D7BA2A596E4FFD64C8 /* Debug */,
+				93407BA967481CA699D7F933 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9E23E01F2A6293612EBCB7B2 /* Build configuration list for PBXNativeTarget "MeuPontoDigital" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3FAD3793C4ED7BEB47342F4F /* Debug */,
+				B23CF62208DC482642840E66 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A105EE635ADDAD12511DA2F0 /* Build configuration list for PBXProject "MeuPontoDigital" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				749E94CA67338AC4DAEFC90B /* Debug */,
+				C88B860E098A56D4AEF6B326 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		4ADD2878712C94CC7E4F8CF7 /* XCLocalSwiftPackageReference "PontoCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = PontoCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		22889188012D58D8F1B8313E /* PontoCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PontoCore;
+		};
+		306A95115FDF001D25E29147 /* PontoCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PontoCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 4CB1AEE4380729609AE50ED0 /* Project object */;
+}
