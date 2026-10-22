@@ -5,3 +5,4 @@ test-results/
 playwright-report/
 *.tar.gz
 .DS_Store
+*.zip

@@ -1,129 +1,89 @@
-# 1. Especificação funcional e 2. Fluxo de telas
+# 1. Especificação funcional · 2. Fluxo de telas · 3. Telas
 
-## Objetivo
+## Objetivo e critério de sucesso
 
-Transformar fotografias de tickets impressos de registro de ponto em registros digitais
-pesquisáveis, preservando a imagem original, para que o usuário encontre um comprovante
-meses depois por **data, horário ou conteúdo**.
-
-**Critério de sucesso:** fotografar um ticket hoje e localizá-lo depois, com a imagem
-original preservada e os dados extraídos disponíveis para conferência.
+Transformar fotos de tickets impressos de ponto em registros pesquisáveis, preservando a imagem
+original. **Sucesso:** fotografar um ticket hoje e localizá-lo meses depois por data, horário ou
+conteúdo, com a foto original e os dados extraídos disponíveis para conferência.
 
 ## Princípios
 
-| Princípio | Como o app cumpre |
+| Princípio | Como o portal cumpre |
 |---|---|
-| Local-first | Banco SwiftData e imagens no aparelho. OCR com Apple Vision, sem internet. |
+| Local-first | Banco IndexedDB e OCR no navegador. Depois da primeira abertura, funciona sem internet. |
 | Nunca presumir | Data, horário e tipo com dúvida exigem confirmação. O tipo nunca é deduzido pela ordem do dia. |
-| Original intocável | Bytes da foto gravados sem recompressão; texto do OCR guardado sem alteração; correções vão para o histórico. |
+| Original intocável | A foto é guardada exatamente como recebida; o texto do OCR nunca é alterado; correções vão para o histórico. |
 | Sem exclusão automática | Duplicidades são apenas sinalizadas. |
-| Linguagem cuidadosa | A análise mostra “diferença indicativa” e “estimativa”; nunca “hora extra”, “atraso” ou “infração”. |
+| Linguagem cuidadosa | "Diferença indicativa" e "estimativa"; nunca "hora extra", "atraso" ou "infração". |
 
-## Funcionalidades (MVP implementado)
+## Funcionalidades
 
-### Captura
-- **Fotografar ticket** — scanner de documentos do iOS (detecta bordas, corrige perspectiva, várias páginas = vários tickets). Fallback: câmera comum.
-- **Importar foto** — galeria (até 10 de uma vez, formato original HEIC/JPEG preservado).
-- **Arquivos** — imagens do app Arquivos (nome original do arquivo é registrado).
-- **Editor** — recorte pelos 4 cantos, girar 90°, realce de legibilidade (cinza + contraste + nitidez). Opera numa cópia.
+**Captura** — "Fotografar ticket" abre a câmera traseira; "Importar foto ou arquivo" aceita galeria e
+app Arquivos (até 20 por vez, processados em fila: "Ticket 1 de 3", com "Pular"). Editor: recorte pelos
+4 cantos, girar 90°, realce (cinza + contraste + ampliação + binarização adaptativa), restaurar.
 
-### Reconhecimento (OCR + interpretação)
-Extrai, quando impressos: funcionário, matrícula/PIS/CPF (com validação de dígitos), empresa,
-CNPJ (numérico **e alfanumérico**, com validação), data, horário (com segundos), tipo de marcação,
-REP/relógio, NSR/nº do ticket, código de autenticação e “outras informações” (pares rótulo: valor).
+**Reconhecimento** — extrai, quando impressos: funcionário, matrícula/PIS/CPF (com validação de
+dígitos), empresa, CNPJ (numérico e alfanumérico, validado), data, horário (com segundos), tipo,
+REP/relógio, NSR/nº do ticket, código de autenticação e "outras informações" (pares rótulo: valor).
+Formatos: `22/10/2026`, `22-10-26`, `22.10.2026`, `2026-10-22`, `22 OUT 2026`, `22 de outubro de 2026`,
+`08:01`, `08:01:33`, `8h01`. Confusões típicas (`O→0`, `l→1`, `S→5`) são corrigidas **com redução de
+confiança**. Vários valores diferentes no mesmo ticket → confiança reduzida e aviso.
 
-- Formatos de data: `22/10/2026`, `22-10-26`, `22.10.2026`, `2026-10-22`, `22 OUT 2026`, `22 de outubro de 2026`.
-- Horários: `08:01`, `08:01:33`, `8h01`.
-- Correção de confusões típicas do OCR (`O→0`, `l→1`, `S→5`) **com redução da confiança** e aviso.
-- Frases de tipo: “Entrada”, “Saída”, “Saída para almoço” (= início de intervalo), “Retorno intervalo” etc.
-  Cabeçalhos como “Registro de entrada e saída” são ignorados; tipos conflitantes viram “não identificado”.
-- Várias datas/horários diferentes no mesmo ticket → confiança reduzida + aviso.
+**Revisão** — confiança Alta/Média/Baixa por campo (texto + %, não só cor). Campos críticos duvidosos
+ficam destacados e exigem "Está correto" ou edição. "Salvar e confirmar" só sem pendências; "Salvar para
+revisar depois" sempre. Antes de salvar, verifica duplicidade (mesmo código, mesmo NSR no mesmo REP,
+mesma data+hora+tipo, imagem parecida) e pergunta.
 
-### Revisão
-- Cada campo mostra **confiança Alta / Média / Baixa** (texto + ícone + %, não só cor).
-- Campos críticos (data, horário, tipo) com dúvida ficam destacados e exigem **“Está correto”** ou edição.
-- **Salvar e confirmar** só fica disponível sem pendências; **Salvar para revisar depois** sempre disponível (fica “pendente”).
-- Ao salvar, verifica **possíveis duplicidades** (mesmo código, mesmo NSR no mesmo REP, mesma data+hora+tipo, imagem parecida) e pergunta.
-- Correções feitas na revisão em relação ao OCR entram no histórico.
+**Arquivo** — linha do tempo por mês, ordenada pela data/hora impressas; busca sem acentos em todos os
+campos, no texto do OCR, observações, etiquetas, nome do arquivo e formas alternativas de data/hora.
+Filtros: período, mês/ano, horário, tipo, empresa, funcionário, etiquetas, incompletos, sinalizados,
+revisão pendente.
 
-### Arquivo e busca
-- Linha do tempo agrupada por mês, ordenada pela **data/horário impressos** (não pela data da foto). Sem data → seção própria.
-- Busca textual sem acento/maiúsculas em todos os campos, no texto integral do OCR, observações, etiquetas, nome do arquivo e em formas alternativas: `22/10`, `22/10/26`, `outubro`, `quinta-feira`, `8:01`, `8h01`.
-- Filtros: data, período, mês/ano, empresa/CNPJ, funcionário/matrícula, tipo, faixa de horário, etiquetas, incompletos, sinalizados, revisão pendente.
+**Detalhe** — foto original (e a recortada) com zoom; dados com confiança; texto do OCR; data de
+inclusão; histórico; observações; etiquetas; possíveis duplicidades; compartilhar PDF, compartilhar foto
+original, imprimir, excluir (com confirmação).
 
-### Detalhe do ticket
-1. Foto original (zoom por pinça/toque duplo) e a versão tratada. 2. Texto do OCR (selecionável).
-3. Dados estruturados com confiança. 4. Data/hora de inclusão. 5. Histórico de alterações.
-6. Observações. 7. Etiquetas (Entrada, Saída, Intervalo, Divergência + personalizadas).
-8. Compartilhar PDF, compartilhar foto original, imprimir, excluir (com confirmação).
-Também: sinalizar para conferência, possíveis duplicidades com link, outras informações.
+**Calendário e dia** — grade mensal com contagem e alerta de revisão; dia com marcações, tempo entre
+elas, resumo e associação manual de jornada ("Pertence à jornada de dd/mm" para turnos noturnos).
 
-### Calendário e dia
-- Grade mensal com número de tickets por dia e alerta de revisão; deslizar troca o mês.
-- Dia: todas as marcações em ordem, tempo entre elas, resumo da jornada.
-- **Associação manual de jornada** (turno noturno): tocar e segurar → “Pertence à jornada de dd/mm”.
+**Jornada (opcional)** — períodos só com tipos confirmados; pendências (início sem fim, fim sem início,
+início duplicado, número ímpar, intervalo abaixo da referência); resumo mensal só com dias sem pendências;
+dias úteis sem ticket; PDF e CSV; jornada de referência por dia da semana.
 
-### Análise de jornada (opcional, pode ser desligada)
-- Pares entrada→saída/intervalo **somente com tipos confirmados**; sem tipo → mostra só os intervalos entre marcações.
-- Pendências: marcação de início sem fim, fim sem início, início duplicado, número ímpar, intervalo abaixo da referência.
-- Resumo mensal soma só dias sem pendências; lista dias úteis sem ticket. Exporta PDF e CSV.
-- Jornada de referência configurável por dia da semana, intervalo de referência.
+**Ajustes** — Face ID/código, backup/restauração, CSV, jornada, política de privacidade, onde os dados
+ficam, apagar tudo. Primeira abertura: apresentação de privacidade e opção de proteção.
 
-### Segurança, backup e privacidade
-Ver [04-BACKUP-SEGURANCA-PRIVACIDADE.md](04-BACKUP-SEGURANCA-PRIVACIDADE.md).
-
-## Fluxo de navegação
+## Fluxo de telas
 
 ```mermaid
 flowchart TD
-    A[Abertura] -->|bloqueio ativo| L[Desbloqueio Face ID / código]
-    A -->|1ª vez| O[Boas-vindas + privacidade + ativar Face ID]
+    A[Abrir o link] -->|proteção ativa| L[Face ID / código]
+    A -->|1ª vez| O[Boas-vindas + privacidade]
     L --> T
-    O --> T
-    T{{Abas}} --> H[Início]
-    T --> R[Arquivo]
-    T --> C[Calendário]
-    T --> J[Jornada]
-    T --> S[Ajustes]
-
-    H -->|Fotografar| CAM[Scanner/câmera]
-    H -->|Importar foto| PH[Fotos]
-    H -->|Arquivos| FI[App Arquivos]
-    CAM --> E[Editor: recortar, girar, realçar]
-    PH --> E
-    FI --> E
+    O --> T{{Abas}}
+    T --> H[Início] & R[Arquivo] & C[Calendário] & J[Jornada] & S[Ajustes]
+    H -->|Fotografar / Importar| E[Editor: recortar, girar, realçar]
     E --> OCR[Reconhecendo no aparelho…]
-    OCR -->|texto| REV[Revisão com confiança]
-    OCR -->|falhou| MAN[Ajustar de novo / preencher manualmente]
-    MAN --> REV
-    REV -->|duplicidade?| DUP[Alerta: salvar mesmo assim / revisar]
-    REV --> SAVE[(Salvo)]
-    DUP --> SAVE
+    OCR --> REV[Revisão com confiança]
+    OCR -->|falhou| MAN[Ajustar de novo / preencher manualmente] --> REV
+    REV --> DUP{Duplicidade?}
+    DUP -->|não| SAVE[(Salvo)]
+    DUP -->|sim| ASK[Salvar mesmo assim / cancelar] --> SAVE
     SAVE -->|próximo da fila| E
-
-    H -->|busca| R
-    H -->|alertas| R
-    R --> D[Detalhe do ticket]
-    C --> DIA[Dia: marcações + resumo] --> D
+    H -->|busca, alertas| R --> D[Detalhe] --> ED[Editar]
+    C --> DIA[Dia] --> D
     J --> DIA
-    D --> ED[Editar = mesma tela de revisão]
-    D --> SH[PDF / foto / imprimir]
-    S --> BK[Backup e exportação]
-    S --> JR[Jornada de referência]
-    S --> PV[Privacidade / onde ficam os dados / apagar tudo]
+    S --> BK[Backup] & JR[Jornada de referência] & PV[Privacidade]
 ```
 
-## Telas (resumo)
+## Telas reais (capturadas no teste automatizado, tamanho de iPhone)
 
-| Tela | Conteúdo principal | Uso com uma mão |
+| | | |
 |---|---|---|
-| Início | Busca, total de tickets, pendências, alertas, recentes, últimos dias | Botões de captura **fixos na parte de baixo** |
-| Arquivo | Linha do tempo por mês, busca, filtros, ordem, duplicidades | Busca nativa puxando a lista |
-| Calendário | Grade mensal, lista de dias com horários | Deslizar para trocar o mês |
-| Dia | Marcações, tempos, resumo, associação de jornada | Menu de contexto / deslizar |
-| Detalhe | Foto, dados, OCR, histórico, ações | Menu “…” no topo |
-| Revisão/edição | Formulário com confiança e confirmações | Botões grandes no fim |
-| Jornada | Mês, resumo, dias, exportação | — |
-| Ajustes | Face ID, backup, jornada, privacidade | — |
+| ![Início](telas/05-inicio.png) Início | ![Editor](telas/01-editor.png) Editor | ![Revisão](telas/02-revisao.png) Revisão |
+| ![Pendente](telas/03-revisao-pendente.png) Confirmação obrigatória | ![Duplicidade](telas/04-duplicidade.png) Duplicidade | ![Arquivo](telas/06-arquivo.png) Arquivo |
+| ![Detalhe](telas/07-detalhe.png) Detalhe | ![Calendário](telas/08-calendario.png) Calendário | ![Dia](telas/09-dia.png) Dia |
+| ![Jornada](telas/11-jornada.png) Jornada | ![Backup](telas/10-backup.png) Backup | ![Boas-vindas](telas/00-boas-vindas.png) Boas-vindas |
 
-O protótipo visual (6 telas) está publicado em https://claude.ai/artifact/Fh62W8ktAGnvSHxKXZBhdH (privado — compartilhe pelo menu Share se outras pessoas precisarem ver). Os fontes ficam em `docs/prototipo/`.
+No navegador de testes (Chromium em inglês) os campos de data/hora aparecem como `10/22/2026` e `PM`;
+no iPhone em português aparecem como `22/10/2026` e 24 h.

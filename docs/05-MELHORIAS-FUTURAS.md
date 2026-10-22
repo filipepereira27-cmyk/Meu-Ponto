@@ -1,27 +1,22 @@
-# 12. Plano de melhorias futuras
+# 12. Melhorias futuras
 
-Prioridade sugerida, do mais útil para o menos.
-
-## Curto prazo (próxima versão)
-1. **Compilar e rodar no Xcode**, corrigir eventuais erros de tipo e executar `AppTests` (ver estado em README).
-2. **Testes com tickets reais** de vários fabricantes (Henry, Control iD, Dimep, Madis, Topdata…) e
-   ajuste das listas de rótulos do `TicketTextParser` com os casos encontrados.
-3. **Backup com senha** (AES‑GCM via CryptoKit, chave derivada com PBKDF2/CommonCrypto), opcional.
-4. **Backup automático** para uma pasta escolhida (bookmark com escopo de segurança, ex.: iCloud Drive), ao abrir o app quando o último backup estiver vencido.
-5. **Recorte automático** também para fotos da galeria (`VNDetectRectanglesRequest` + correção de perspectiva).
-6. Destaque na imagem da região de onde cada campo foi lido (caixas do Vision).
+## Curto prazo
+1. **Testes no iPhone real** (Safari e app instalado) e com **tickets reais** de vários fabricantes
+   (Henry, Control iD, Dimep, Madis, Topdata…); ajustar rótulos do parser com os casos encontrados.
+2. **Criptografia dos dados** com chave derivada da chave de acesso (WebAuthn PRF, iOS 18+).
+3. **Backup com senha** (AES‑GCM, chave via PBKDF2).
+4. **Detecção automática das bordas** do ticket e correção de perspectiva em fotos inclinadas.
+5. Destacar na foto a região de onde cada campo foi lido.
+6. Lembrete de backup mais ativo e opção de backup para pasta escolhida (File System Access, onde houver).
 
 ## Médio prazo
-7. **Importar PDF** (espelho de ponto/relatórios), uma página por ticket.
-8. Comparação com o **espelho de ponto da empresa** (AFD/AEJ da Portaria 671): marcações ausentes ou divergentes.
-9. **Widget** e **Atalhos/Siri** (“Fotografar ticket”), botão de Ação do iPhone.
-10. Ajustes de jornada mais ricos: escalas 12×36, banco de horas, feriados, jornadas diferentes por período (sempre como referência).
-11. Lembrete opcional para fotografar o ticket (notificação local no horário habitual).
-12. Mesclar manualmente dois tickets duplicados preservando ambos os históricos.
+7. Importar **PDF** (espelho de ponto) e comparar com AFD/AEJ da Portaria 671.
+8. Escalas 12×36, banco de horas, feriados (sempre como referência).
+9. Mesclar duplicidades preservando os dois históricos.
+10. Atalhos (`?acao=fotografar`) e compartilhar foto direto para o portal (Web Share Target, onde suportado).
 
-## Longo prazo
-13. **Sincronização iCloud opcional** (CloudKit privado), com `SchemaV2`, consentimento e estratégia de conflitos (ver 02-ARQUITETURA).
-14. iPad e Mac (Catalyst/Designed for iPad) com arrastar e soltar.
-15. Modelo de IA **no aparelho** (Core ML) para classificar layouts e melhorar a extração, sem enviar dados.
-16. Tradução para inglês/espanhol (o app já usa textos centralizados nas telas).
-17. Relatório para advogado/sindicato com seleção de tickets, índice e imagens em alta resolução.
+## Longo prazo (exige decisão sobre dados na nuvem)
+11. **Sincronização opcional entre aparelhos** com conta e criptografia de ponta a ponta (o servidor
+    guardaria só dados cifrados), desligada por padrão e com consentimento.
+12. Relatório para advogado/sindicato com seleção de tickets e imagens em alta resolução.
+13. Versão em inglês/espanhol.

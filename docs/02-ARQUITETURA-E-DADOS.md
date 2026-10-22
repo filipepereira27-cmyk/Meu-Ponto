@@ -1,148 +1,74 @@
-# 4. Arquitetura técnica e 5. Modelo de dados
+# 4. Arquitetura · 5. Modelo de dados
 
 ## Decisões
 
 | Tema | Escolha | Motivo |
 |---|---|---|
-| iOS mínimo | **17.0** | SwiftData, `@Observable`, `ContentUnavailableView`, OCR em pt-BR. Cobre iPhone XS/XR em diante. |
-| Interface | SwiftUI (UIKit só para scanner, câmera, zoom, exportação, impressão) | Nativo, modo claro/escuro, Dynamic Type, VoiceOver. |
-| OCR | Apple Vision `VNRecognizeTextRequest` (`.accurate`, `pt-BR`) | No aparelho, gratuito, sem internet, sem assinatura. |
-| Captura | VisionKit `VNDocumentCameraViewController` | Detecção de bordas e correção de perspectiva prontas. |
-| Persistência | **SwiftData** com `VersionedSchema` + `SchemaMigrationPlan` | Migrações declaradas = atualizações sem perda. |
-| Imagens | Arquivos em `Application Support/MeuPontoDigital/Comprovantes` | Banco leve; bytes originais preservados. |
-| Proteção | `FileProtectionType.complete` nas imagens; bloqueio com `LocalAuthentication` | Criptografia do iOS + Face ID/código. |
-| Lógica de negócio | Pacote Swift **PontoCore** (só Foundation) | Testável fora do iPhone; 43 testes automatizados. |
-| iCloud/CloudKit | **Não** no MVP (`cloudKitDatabase: .none`) | Ver seção “Sincronização com iCloud”. |
-| Projeto | XcodeGen (`project.yml`) → `MeuPontoDigital.xcodeproj` já gerado | Projeto reproduzível e legível. |
+| Formato | **PWA** (site instalável) | Acesso por link, sem loja nem Mac; instalável na Tela de Início do iPhone. |
+| Dados | **IndexedDB no aparelho** | Privacidade (sem servidor de dados, sem LGPD de terceiros), grátis, funciona offline. |
+| OCR | **Tesseract.js 7** (WebAssembly), modelo `por` LSTM | Roda no navegador; nada sai do aparelho. Arquivos servidos pelo próprio portal. |
+| Pré-processamento | Cinza → contraste (percentis) → ampliação → binarização adaptativa (Sauvola) | Nas amostras, recuperou o ticket borrado (de 0 para todos os campos). |
+| Interface | React 19 + TypeScript, CSS próprio (claro/escuro), rotas por `#` | Leve, funciona em qualquer hospedagem estática. |
+| Offline | Service worker (Workbox): telas pré-carregadas; motor do OCR guardado no primeiro uso | Só a variante do motor usada pelo aparelho é baixada (~4 MB + 1,4 MB do idioma). |
+| PDF | jsPDF | Gerado no aparelho. |
+| Backup | `.zip` comum (fflate) com manifesto JSON, CSV, imagens e CRC32 | Abre em qualquer computador; lido/gravado em fluxo. |
+| Proteção | WebAuthn (chave de acesso do aparelho: Face ID / Touch ID / código) | Sem servidor; ver limites em 04. |
+| Hospedagem | Estática: GitHub Pages (workflow incluso), Netlify, Cloudflare Pages | Grátis; HTTPS obrigatório (câmera, Face ID, service worker). |
 
 ## Camadas
 
 ```
-┌──────────────────────────── App (iOS, SwiftUI) ────────────────────────────┐
-│ Views/            Início · Arquivo · Calendário · Jornada · Ajustes        │
-│                   Captura (scanner, editor, revisão) · Detalhe             │
-│ Services/         OCRService (Vision) · ImageProcessing (CoreImage)        │
-│                   ImageStore (arquivos) · BackupService · ExportService    │
-│                   AppLock (Face ID) · AppSettings · AppNavigation          │
-│ Models/           SchemaV1 (SwiftData: Ticket, TicketChange) + mapeamento  │
-└──────────────────────────────────┬─────────────────────────────────────────┘
-                                   │ TicketRecord (valor, Codable)
-┌──────────────────────────── PontoCore (Foundation) ─────────────────────────┐
-│ TicketTextParser   linhas do OCR → ParsedTicket (campos + confiança)        │
-│ DocumentValidators CNPJ (numérico/alfanumérico), CPF, PIS                   │
-│ TicketFilter       busca textual + filtros + ordenação cronológica          │
-│ DuplicateDetector  códigos, NSR, data/hora/tipo, dHash de imagem            │
-│ WorkdayAnalyzer    jornada diária/mensal, pendências, estimativas           │
-│ ChangeTracker      diferenças campo a campo para o histórico                │
-│ CSVExporter        CSV `;` UTF-8 com BOM (Excel/Numbers pt-BR)              │
-│ BackupArchive      formato .mpdbackup em fluxo com CRC32                    │
-└─────────────────────────────────────────────────────────────────────────────┘
+src/core/      TypeScript puro, testado em Node (sem navegador)
+  parser.ts      linhas do OCR → campos + confiança + avisos
+  validators.ts  CNPJ (numérico/alfanumérico), CPF, PIS
+  imageOps.ts    cinza, contraste, redimensionar, Sauvola, rotação, dHash
+  archive.ts     busca/filtros, histórico (diff), duplicidades
+  workday.ts     jornada diária/mensal, pendências, CSV
+  backup.ts      .zip em fluxo + CRC32
+  calendar.ts    datas/horas civis (texto, sem fuso)
+src/services/  navegador: IndexedDB, OCR (Tesseract), canvas, PDF, compartilhar, WebAuthn, backup
+src/ui/        React: store, rotas, telas
 ```
 
-### Fluxo de um ticket
+Fluxo de um ticket: arquivo → editor (cópia girada/recortada) → realce → OCR → `parseTicket` → revisão
+(rascunho com confirmações) → checagem de duplicidade → transação única no IndexedDB com o ticket, a
+**foto original (Blob intacto)**, a cópia recortada e a miniatura.
 
-1. Captura → `ImportedImage` (bytes originais + cópia orientada).
-2. Editor → cópia girada/recortada/realçada.
-3. `OCRService.recognizeLines` → linhas (fragmentos na mesma altura são unidos: `DATA: …  HORA: …`).
-4. `TicketTextParser.parse` → `ParsedTicket` com confiança por campo e avisos.
-5. Revisão (`TicketDraft`) → confirmação dos campos críticos.
-6. Verificação de duplicidade → gravação: imagem original (bytes intactos), imagem tratada (JPEG),
-   registro SwiftData, histórico (inclusão + correções em relação ao OCR).
+Confiança do campo = confiança da linha (Tesseract) × fator da interpretação (rótulo 0,95–1; ano com 2
+dígitos ×0,95; caracteres corrigidos ×0,75; empresa sem rótulo ×0,6–0,75; valores conflitantes ×0,6 e
+abaixo do limite; dígito verificador inválido ×0,5–0,6). Limite para confirmação: **0,85**.
 
-### Confiança
+## Modelo de dados (IndexedDB `meu-ponto-digital`, versão 1)
 
-`confiança do campo = confiança da linha (Vision) × fator da interpretação`
-
-| Situação | Fator |
-|---|---|
-| Valor com rótulo (`NSR:`, `DATA:`) | 0,95–1,0 |
-| Data com ano de 2 dígitos | ×0,95 |
-| Caracteres corrigidos (`O→0`) | ×0,75–0,8 |
-| Empresa sem rótulo | ×0,6–0,75 + aviso |
-| Valores diferentes no mesmo ticket | ×0,6 e sempre abaixo do limite |
-| Documento com dígito verificador inválido | ×0,5–0,6 + aviso |
-
-Limite para confirmação: **0,85**. Abaixo disso o campo é destacado.
-
-## Modelo de dados
-
-### `Ticket` (SwiftData, `SchemaV1`)
+**`tickets`** (chave `id`, índice `recordDate`) — `TicketRecord`:
 
 | Campo | Tipo | Observação |
 |---|---|---|
-| `id` | UUID (único) | ID do ticket |
-| `originalFileName` | String | Nome do arquivo importado ou `Camera-AAAA-MM-DD-HHMMSS.jpg` |
-| `imageFileName` | String | Arquivo da **imagem original** (bytes intactos) |
-| `processedImageFileName` | String? | Cópia tratada usada no OCR |
-| `imageHashBits` | Int64? | dHash 64 bits (duplicidade) |
-| `ocrText` | String | Texto integral reconhecido — **nunca alterado** |
-| `ocrConfidence` | Double | Média das linhas |
-| `fieldConfidencesData` | Data (JSON) | Confiança por campo |
-| `ocrSnapshotData` | Data (JSON) | `ParsedTicket` original: valores extraídos antes de qualquer correção |
-| `recordDayKey` | String? | Data impressa `yyyy-MM-dd` (sem fuso; ordenável) |
-| `recordTimeText` | String? | Horário impresso `HH:mm[:ss]` |
-| `markTypeRaw` | String | `entrada`, `saida`, `inicioIntervalo`, `fimIntervalo`, `indefinido` |
-| `company`, `cnpj` | String | Empresa |
-| `employeeName`, `employeeID` | String | Funcionário / matrícula / PIS / CPF |
-| `clockID` | String | REP / relógio |
-| `ticketNumber` | String | NSR / nº do ticket |
-| `authCode` | String | Código de autenticação |
-| `otherFieldsData` | Data (JSON) | Outros pares rótulo/valor |
-| `importedAt` | Date | Data/hora de inclusão no app |
-| `updatedAt` | Date | Última alteração |
-| `isConfirmed` | Bool | Revisão: pendente/confirmada |
-| `isFlagged` | Bool | Sinalizado para conferência |
-| `notes` | String | Observações pessoais |
-| `tags` | [String] | Etiquetas |
-| `journeyDayKey` | String? | Associação manual a uma jornada (turno noturno) |
-| `changes` | [TicketChange] | Histórico (exclusão em cascata) |
+| `id` | string (UUID) | |
+| `originalFileName`, `originalMimeType` | string | Nome/tipo do arquivo recebido |
+| `hasProcessedImage` | boolean | Existe cópia recortada |
+| `imageHash` | string? | dHash 64 bits (hex) para duplicidade |
+| `ocrText` | string | Texto integral — **nunca alterado** |
+| `ocrConfidence`, `fieldConfidences` | number, mapa | Confiança média e por campo |
+| `ocrSnapshot` | ParsedTicket | Valores extraídos antes de qualquer correção |
+| `recordDate` | `aaaa-mm-dd`? | Data impressa (sem fuso; ordenável) |
+| `recordTime` | `HH:MM[:SS]`? | Horário impresso |
+| `markType` | `entrada` \| `saida` \| `inicioIntervalo` \| `fimIntervalo` \| `indefinido` | |
+| `company`, `cnpj`, `employeeName`, `employeeID`, `clockID`, `ticketNumber`, `authCode` | string | |
+| `otherFields` | {label, value}[] | Outras informações do comprovante |
+| `importedAt`, `updatedAt` | ISO 8601 | Inclusão e última alteração |
+| `isConfirmed`, `isFlagged` | boolean | Revisão / sinalizado |
+| `notes`, `tags` | string, string[] | |
+| `journeyDate` | `aaaa-mm-dd`? | Associação manual de jornada |
+| `changes` | {id, date, field, oldValue, newValue}[] | Histórico |
 
-### `TicketChange`
-`id`, `date`, `field`, `oldValue`, `newValue`, `ticket`.
+**`images`** (chave `"<id>:original" | ":tratada" | ":miniatura"`, índice `ticketId`) — `{ blob }`.
+**`settings`** — ajustes (jornada, proteção, último backup, lembretes).
 
-### Por que data e hora como texto?
-Comprovantes registram a **hora local do relógio**. Guardar como `Date` exigiria escolher um fuso
-e poderia mudar o dia ao viajar ou com mudanças de fuso. `yyyy-MM-dd` + `HH:mm` são exatamente o que
-está impresso, ordenam corretamente como texto e são fáceis de pesquisar e exportar.
+**Migrações:** cada mudança incrementa `DB_VERSION` em `src/services/db.ts` e acrescenta um passo
+`if (oldVersion < N)` no `upgrade`; passos antigos nunca mudam. Registros existentes não são recriados.
 
-### Migrações (atualizar sem perder registros)
-1. Nunca altere `SchemaV1` depois de publicado.
-2. Crie `SchemaV2` copiando as classes e aplicando a mudança.
-3. Adicione `MigrationStage.lightweight(fromVersion: SchemaV1.self, toVersion: SchemaV2.self)`
-   (ou `.custom` para transformar dados) em `TicketMigrationPlan`.
-4. Teste abrindo um banco criado pela versão anterior (guarde um `.store` de exemplo).
-5. Se o banco não abrir, o app mostra uma tela de erro **sem recriar o banco** (nada é apagado).
+## Por que não há sincronização entre aparelhos
 
-## Sincronização com iCloud (não incluída no MVP)
-
-**Hoje:** dados apenas no aparelho. O backup do iPhone (iCloud/computador) inclui os dados do app
-se estiver ativo nos Ajustes do iPhone. O backup do app (`.mpdbackup`) pode ser salvo no iCloud Drive.
-
-**Se for implementada (CloudKit via SwiftData):**
-- O que sincroniza: os registros (`Ticket`, `TicketChange`) no banco **privado** do usuário no iCloud;
-  imagens como `@Attribute(.externalStorage) Data` ou `CKAsset`.
-- Requisitos do SwiftData + CloudKit: sem `@Attribute(.unique)`, todas as propriedades opcionais ou com
-  valor padrão, relacionamentos opcionais → exige um `SchemaV2` e migração.
-- Conflitos: CloudKit usa “último a gravar vence” por registro. Para não perder correções, o
-  histórico (`TicketChange`) é só-inclusão (nunca editado), e edições simultâneas no mesmo campo
-  ficariam ambas no histórico.
-- Exclusões propagam para todos os aparelhos → manter a confirmação dupla e recomendar backup.
-- Deve ser **opcional, desligada por padrão**, com explicação e consentimento (LGPD), e conta paga do
-  Apple Developer Program (CloudKit não funciona com conta gratuita).
-
-## Estrutura de pastas
-
-```
-MeuPontoDigital/
-├── MeuPontoDigital.xcodeproj   (gerado pelo XcodeGen)
-├── project.yml
-├── App/
-│   ├── MeuPontoDigitalApp.swift
-│   ├── Models/        Schema.swift, Ticket+Record.swift
-│   ├── Services/      OCR, imagens, armazenamento, backup, exportação, bloqueio, ajustes
-│   ├── Views/         Home, Archive, Calendar, Detail, Capture, Analysis, Settings, Components
-│   └── Resources/     Assets.xcassets, PrivacyInfo.xcprivacy
-├── AppTests/          SwiftData, backup, OCR com Vision (simulador/aparelho)
-├── PontoCore/         Pacote Swift com a lógica + 43 testes
-└── docs/              Documentação, protótipo e tickets de amostra
-```
+Foi a escolha feita: dados só no aparelho. Para levar os tickets a outro aparelho, use backup →
+restaurar. Uma sincronização futura exigiria servidor/conta (ver 05), com consentimento explícito.

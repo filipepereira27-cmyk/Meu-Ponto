@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -30,10 +30,17 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // OCR completo offline: motor (wasm) e dados do português ficam no cache do aparelho.
-        globPatterns: ['**/*.{js,css,html,svg,png,wasm,gz}'],
-        maximumFileSizeToCacheInBytes: 20 * 1024 * 1024,
+        globPatterns: ['**/*.{js,css,html,svg,png}'],
+        globIgnores: ['ocr/**'],
         navigateFallback: 'index.html',
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        // Motor do OCR: só a variante usada pelo aparelho é baixada (na primeira leitura,
+        // ou no aquecimento logo após abrir o app) e fica guardada para uso sem internet.
+        runtimeCaching: [{
+          urlPattern: ({ url }) => url.pathname.includes('/ocr/'),
+          handler: 'CacheFirst',
+          options: { cacheName: 'ocr-v1', expiration: { maxEntries: 10 } },
+        }],
       },
     }),
   ],
