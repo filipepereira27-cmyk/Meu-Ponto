@@ -292,3 +292,6 @@ progress { width: 220px; accent-color: var(--accent); }
   .tabbar, .capture-bar, .bar-actions, .back { display: none !important; }
   body { background: #fff; }
 }
+
+.tips summary { cursor: pointer; color: var(--accent); min-height: 32px; }
+.tips ul { margin: 4px 0 0; padding-left: 18px; text-align: left; }

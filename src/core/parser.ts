@@ -69,23 +69,63 @@ function matchLabel(normalized: string, exact: boolean): { label: string; catego
 }
 
 /** Divide "RÓTULO: valor" ou "RÓTULO valor" (rótulos conhecidos). */
-export function splitLabel(text: string): { label: string; category: Category; value: string } | undefined {
-  // Ruído do OCR antes do rótulo ("| Saída", "À Matrícula:") é descartado.
+type Split = { label: string; category: Category; value: string; fuzzy?: boolean };
+
+export function splitLabel(text: string): Split | undefined {
+  // Ruído do OCR antes do rótulo ("| Saída", "À Matrícula:", "Sofa  REP:") é descartado.
   const cleaned = text.replace(/^[^\p{L}\p{N}]+/u, '');
-  const words = cleaned.split(' ');
-  if (words.length > 1 && words[0].length === 1) {
-    const withoutFirst = splitLabel(words.slice(1).join(' '));
-    const direct = splitLabelClean(cleaned);
-    if (!direct && withoutFirst) return withoutFirst;
+  const direct = splitLabelClean(cleaned);
+  if (direct && !direct.fuzzy) return direct;
+  const words = cleaned.split(' ').filter(Boolean);
+  for (let drop = 1; drop <= 2 && drop < words.length; drop++) {
+    // Só descarta palavras curtas (lixo típico de borda/sombra), nunca o conteúdo.
+    if (words.slice(0, drop).some((w) => w.length > 6)) break;
+    const rest = splitLabelClean(words.slice(drop).join(' '));
+    if (rest && !rest.fuzzy) return rest;
   }
-  return splitLabelClean(cleaned);
+  return direct;
 }
 
-function splitLabelClean(text: string): { label: string; category: Category; value: string } | undefined {
+/** Distância de edição (Levenshtein). */
+function editDistance(a: string, b: string): number {
+  const dp = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = dp[0];
+    dp[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = dp[j];
+      dp[j] = Math.min(dp[j] + 1, dp[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = tmp;
+    }
+  }
+  return dp[b.length];
+}
+
+/** Dígitos que o OCR coloca no lugar de letras em rótulos ("N5R" → "NSR", "0ATA" → "OATA"). */
+const letterize = (s: string) => s.replace(/0/g, 'O').replace(/1/g, 'I').replace(/5/g, 'S').replace(/8/g, 'B');
+
+/**
+ * Rótulo aproximado ("DAZA" → DATA, "CPE" → CPF, "TONE" → NOME). Só para rótulos com
+ * 3+ letras, tolerando 1 erro (2 em rótulos longos); a confiança do valor é reduzida.
+ */
+function fuzzyLabel(normalized: string): { label: string; category: Category } | undefined {
+  const candidate = letterize(normalized);
+  if (candidate.length < 3 || /\d/.test(candidate)) return undefined;
+  let best: { label: string; category: Category; d: number } | undefined;
+  for (const [label, category] of LABELS) {
+    if (label.length < 3 || Math.abs(label.length - candidate.length) > 2) continue;
+    const limit = label.length >= 8 ? 2 : 1;
+    const d = editDistance(candidate, label);
+    if (d <= limit && (!best || d < best.d || (d === best.d && label.length > best.label.length))) best = { label, category, d };
+  }
+  return best && { label: best.label, category: best.category };
+}
+
+function splitLabelClean(text: string): Split | undefined {
   const colon = text.indexOf(':');
   if (colon >= 0) {
     const normalized = normalizeLabel(text.slice(0, colon));
-    const exact = matchLabel(normalized, true);
+    const exact = matchLabel(normalized, true) ?? matchLabel(letterize(normalized), true);
     if (exact) return { ...exact, value: text.slice(colon + 1) };
     // Complemento sem números antes dos dois-pontos ("NOME DO TRABALHADOR (A):").
     // Com números, os dois-pontos são de um horário ("NSR 000000987 22/10/26 12:03").
@@ -100,6 +140,11 @@ function splitLabelClean(text: string): { label: string; category: Category; val
     if (candidate.split(' ').length !== count) continue;
     const m = matchLabel(candidate, true);
     if (m && m.label.length >= 3) return { ...m, value: words.slice(count).join(' ') };
+  }
+  // Rótulo deformado pelo OCR, sempre seguido de dois-pontos ("Daza: 01/10/2026").
+  if (colon > 0 && colon <= 24) {
+    const fuzzy = fuzzyLabel(normalizeLabel(text.slice(0, colon)));
+    if (fuzzy) return { ...fuzzy, value: text.slice(colon + 1), fuzzy: true };
   }
   return undefined;
 }
@@ -154,10 +199,13 @@ export function parseTicket(rawLines: OCRLine[], options: ParserOptions = {}): P
   const dateLines = new Set<number>(), timeLines = new Set<number>(), markLines = new Set<number>();
 
   // 1. Pares rótulo/valor
-  lines.forEach((line, index) => {
+  lines.forEach((original, index) => {
+    let line = original;
     const split = splitLabel(line.text);
     if (!split) return;
     const value = split.value.replace(/^[\s:\-.]+|[\s:\-.]+$/g, '');
+    // Rótulo reconhecido só por aproximação: o valor merece conferência.
+    if (split.fuzzy) line = { ...line, confidence: line.confidence * 0.85 };
     switch (split.category) {
       case 'employeeName':
         if (!result.employeeName && isPlausibleName(value)) { result.employeeName = ex(value, line.confidence * 0.97, line.text); }
@@ -172,10 +220,10 @@ export function parseTicket(rawLines: OCRLine[], options: ParserOptions = {}): P
         if (!result.cnpj) { const c = extractCNPJ(value, true, line); if (c) { result.cnpj = c; } }
         break;
       case 'clockID':
-        if (!result.clockID) { const c = extractCode(value); if (c) { result.clockID = ex(c, line.confidence * 0.95, line.text); } }
+        if (!result.clockID) { const c = numericCode(value, line, split.label !== 'TERMINAL' && split.label !== 'EQUIPAMENTO'); if (c) result.clockID = c; }
         break;
       case 'ticketNumber':
-        if (!result.ticketNumber) { const c = extractCode(value); if (c) { result.ticketNumber = ex(c, line.confidence * 0.95, line.text); } }
+        if (!result.ticketNumber) { const c = numericCode(value, line, split.label === 'NSR' || split.label === 'N S R'); if (c) result.ticketNumber = c; }
         break;
       case 'authCode':
         if (!result.authCode) { const c = extractCode(value, true); if (c) { result.authCode = ex(c, line.confidence * 0.9, line.text); } }
@@ -244,6 +292,22 @@ export function parseText(text: string, confidence = 1, options?: ParserOptions)
   return parseTicket(text.split(/\r?\n/).map((t) => ({ text: t, confidence })), options);
 }
 
+/**
+ * Códigos que são sempre numéricos (NSR, nº do REP): letras parecidas com dígitos
+ * ("OO0OOO317") são convertidas, com confiança reduzida e aviso.
+ */
+function numericCode(value: string, line: OCRLine, numeric: boolean): Extracted<string> | undefined {
+  const code = extractCode(value);
+  if (!code) return undefined;
+  if (!numeric || /^\d+$/.test(code)) return ex(code, line.confidence * 0.95, line.text);
+  const fixed = fixDigits(code.replace(/[Cc]/g, '0'));
+  const digitShare = (code.match(/\d/g) ?? []).length / code.length;
+  if (/^\d+$/.test(fixed) && digitShare >= 0.3) {
+    return ex(fixed, Math.min(line.confidence * 0.75, CONFIRMATION_THRESHOLD - 0.05), line.text, `caracteres corrigidos (${code})`);
+  }
+  return ex(code, line.confidence * 0.6, line.text, 'código com caracteres inesperados — confira');
+}
+
 function extractIdentifier(value: string, label: string, line: OCRLine): Extracted<string> | undefined {
   const token = value.split(' ').slice(0, 3).join(' ');
   const code = extractCode(token, true);
@@ -299,6 +363,15 @@ function findDates(line: OCRLine, index: number, minYear: number, maxYear: numbe
     if (fixed.join('') !== parts.join('')) { score *= 0.75; note = `caracteres corrigidos (${m[0]})`; }
     const key = year >= minYear && year <= maxYear ? makeDay(year, month, day) : null;
     if (key) out.push({ value: key, score, note, line: index });
+    else {
+      // Data impossível ("23/16/2026"): o OCR costuma trocar 0 por 6, 8 ou 9 em fotos
+      // borradas. Sugere a correção, sempre pedindo conferência.
+      const rescued = rescueDigits(`${fixed[0].padStart(2, '0')}${fixed[1].padStart(2, '0')}`, (s) => {
+        const k = year >= minYear && year <= maxYear ? makeDay(year, Number(s.slice(2)), Number(s.slice(0, 2))) : null;
+        return k ?? undefined;
+      });
+      if (rescued) out.push({ value: rescued, score: Math.min(score * 0.5, CONFIRMATION_THRESHOLD - 0.1), note: `corrigido de ${m[0]} — confira`, line: index });
+    }
   }
   for (const m of line.text.matchAll(/(?<![0-9])([0-9]{4})[/.\-]([0-9]{1,2})[/.\-]([0-9]{1,2})(?![0-9])/g)) {
     const year = Number(m[1]);
@@ -325,15 +398,36 @@ function findTimes(line: OCRLine, index: number): Candidate<TimeText>[] {
   for (const m of line.text.matchAll(re)) {
     if ((m[0].match(/\d/g) ?? []).length < 2) continue;
     const h = fixDigits(m[1]), mi = fixDigits(m[2]), s = m[3] !== undefined ? fixDigits(m[3]) : undefined;
-    const time = makeTime(Number(h), Number(mi), s !== undefined ? Number(s) : undefined);
-    if (!time) continue;
+    let time = makeTime(Number(h), Number(mi), s !== undefined ? Number(s) : undefined);
+    let rescuedNote: string | undefined;
+    if (!time) {
+      // Horário impossível ("12:69"): tenta as trocas típicas do OCR, sempre pedindo conferência.
+      time = rescueDigits(`${h.padStart(2, '0')}${mi}`, (v) => makeTime(Number(v.slice(0, 2)), Number(v.slice(2)), s !== undefined ? Number(s) : undefined) ?? undefined) ?? null;
+      if (!time) continue;
+      rescuedNote = `corrigido de ${m[0]} — confira`;
+    }
     let score = line.confidence;
     let note: string | undefined;
     if (h !== m[1] || mi !== m[2] || s !== m[3]) { score *= 0.75; note = `caracteres corrigidos (${m[0]})`; }
     if (/h/i.test(m[0])) score *= 0.97;
+    if (rescuedNote) { score = Math.min(score * 0.5, CONFIRMATION_THRESHOLD - 0.1); note = rescuedNote; }
     out.push({ value: time, score, note, line: index });
   }
   return out;
+}
+
+/** Trocas que o OCR faz com dígitos em fotos borradas (o "0" vira 6, 8 ou 9 etc.). */
+const CONFUSIONS: Record<string, string[]> = { '6': ['0', '5'], '8': ['0', '3'], '9': ['0'], '7': ['1'], '3': ['8'], '0': ['8', '6'], '5': ['6'], '1': ['7'] };
+
+/** Tenta trocar um dígito de cada vez até obter um valor válido (ou desiste). */
+function rescueDigits<T>(digits: string, validate: (s: string) => T | undefined): T | undefined {
+  for (let i = 0; i < digits.length; i++) {
+    for (const alt of CONFUSIONS[digits[i]] ?? []) {
+      const v = validate(digits.slice(0, i) + alt + digits.slice(i + 1));
+      if (v !== undefined) return v;
+    }
+  }
+  return undefined;
 }
 
 function choose<T>(candidates: Candidate<T>[], preferred: Set<number>, lines: OCRLine[]): { value: Extracted<T>; warning?: string } | undefined {

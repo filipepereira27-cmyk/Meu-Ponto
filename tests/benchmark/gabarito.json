@@ -1,0 +1,119 @@
+{
+  "henry-boa.jpg": {
+    "date": "2026-09-03",
+    "time": "17:58",
+    "cnpj": "45.723.174/0001-10",
+    "ticketNumber": "45821",
+    "employeeName": "CARLOS ALBERTO DE SOUZA",
+    "company": "METALURGICA SAO JOSE LTDA"
+  },
+  "henry-inclinada.jpg": {
+    "date": "2026-09-03",
+    "time": "17:58",
+    "cnpj": "45.723.174/0001-10",
+    "ticketNumber": "45821",
+    "employeeName": "CARLOS ALBERTO DE SOUZA",
+    "company": "METALURGICA SAO JOSE LTDA"
+  },
+  "henry-desbotada.jpg": {
+    "date": "2026-09-03",
+    "time": "17:58",
+    "cnpj": "45.723.174/0001-10",
+    "ticketNumber": "45821",
+    "employeeName": "CARLOS ALBERTO DE SOUZA",
+    "company": "METALURGICA SAO JOSE LTDA"
+  },
+  "controlid-boa.jpg": {
+    "date": "2026-08-14",
+    "time": "06:59",
+    "cnpj": "11.444.777/0001-61",
+    "ticketNumber": "317",
+    "employeeName": "Juliana Ribeiro Lima",
+    "company": "Hospital Santa Clara"
+  },
+  "controlid-inclinada.jpg": {
+    "date": "2026-08-14",
+    "time": "06:59",
+    "cnpj": "11.444.777/0001-61",
+    "ticketNumber": "317",
+    "employeeName": "Juliana Ribeiro Lima",
+    "company": "Hospital Santa Clara"
+  },
+  "controlid-desbotada.jpg": {
+    "date": "2026-08-14",
+    "time": "06:59",
+    "cnpj": "11.444.777/0001-61",
+    "ticketNumber": "317",
+    "employeeName": "Juliana Ribeiro Lima",
+    "company": "Hospital Santa Clara"
+  },
+  "convencional-boa.jpg": {
+    "date": "2026-10-23",
+    "time": "12:00",
+    "markType": "inicioIntervalo",
+    "employeeName": "Ana Paula Souza",
+    "company": "SUPERMERCADO BOA COMPRA"
+  },
+  "convencional-inclinada.jpg": {
+    "date": "2026-10-23",
+    "time": "12:00",
+    "markType": "inicioIntervalo",
+    "employeeName": "Ana Paula Souza",
+    "company": "SUPERMERCADO BOA COMPRA"
+  },
+  "convencional-desbotada.jpg": {
+    "date": "2026-10-23",
+    "time": "12:00",
+    "markType": "inicioIntervalo",
+    "employeeName": "Ana Paula Souza",
+    "company": "SUPERMERCADO BOA COMPRA"
+  },
+  "repp-boa.jpg": {
+    "date": "2026-10-01",
+    "time": "22:04",
+    "cnpj": "12.ABC.345/01DE-35",
+    "ticketNumber": "981233",
+    "employeeName": "PEDRO HENRIQUE COSTA",
+    "company": "TRANSPORTES RAPIDO SUL LTDA"
+  },
+  "repp-inclinada.jpg": {
+    "date": "2026-10-01",
+    "time": "22:04",
+    "cnpj": "12.ABC.345/01DE-35",
+    "ticketNumber": "981233",
+    "employeeName": "PEDRO HENRIQUE COSTA",
+    "company": "TRANSPORTES RAPIDO SUL LTDA"
+  },
+  "repp-desbotada.jpg": {
+    "date": "2026-10-01",
+    "time": "22:04",
+    "cnpj": "12.ABC.345/01DE-35",
+    "ticketNumber": "981233",
+    "employeeName": "PEDRO HENRIQUE COSTA",
+    "company": "TRANSPORTES RAPIDO SUL LTDA"
+  },
+  "nsrlinha-boa.jpg": {
+    "date": "2026-10-22",
+    "time": "12:03",
+    "cnpj": "45.723.174/0001-10",
+    "ticketNumber": "987",
+    "employeeName": "MARIA OLIVEIRA",
+    "company": "COMERCIAL ALFA S/A"
+  },
+  "nsrlinha-inclinada.jpg": {
+    "date": "2026-10-22",
+    "time": "12:03",
+    "cnpj": "45.723.174/0001-10",
+    "ticketNumber": "987",
+    "employeeName": "MARIA OLIVEIRA",
+    "company": "COMERCIAL ALFA S/A"
+  },
+  "nsrlinha-desbotada.jpg": {
+    "date": "2026-10-22",
+    "time": "12:03",
+    "cnpj": "45.723.174/0001-10",
+    "ticketNumber": "987",
+    "employeeName": "MARIA OLIVEIRA",
+    "company": "COMERCIAL ALFA S/A"
+  }
+}

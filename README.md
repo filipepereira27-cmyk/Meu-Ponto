@@ -22,7 +22,8 @@ um app. **Os tickets ficam no próprio aparelho**: não há login, servidor de d
 
 | Verificação | Resultado |
 |---|---|
-| Testes do núcleo (`npm test`): parser, busca, duplicidades, jornada, CSV, backup, **OCR real nas fotos de amostra** | ✅ 55/55 |
+| Testes do núcleo (`npm test`): parser, busca, duplicidades, jornada, CSV, backup, **OCR real nas fotos de amostra** | ✅ 56/56 |
+| Benchmark de OCR: 15 fotos difíceis (inclinadas, curvadas, desbotadas) | ✅ 90% dos campos corretos, 0 erros aceitos sem confirmação (era 48%) |
 | Teste de ponta a ponta no navegador (`npm run test:e2e`, Chromium em tamanho de iPhone): importar → OCR → revisar → salvar → duplicidade → busca → recarregar → editar/histórico → calendário → backup → apagar → restaurar (2×) → **uso sem internet com OCR** | ✅ passa, sem erros no console, na raiz e em subpasta |
 | Verificação de tipos (`tsc`) e build de produção | ✅ |
 | Teste em iPhone/Safari real | ⏳ ainda não feito — o Chromium não reproduz tudo do Safari (câmera, Face ID, instalação) |

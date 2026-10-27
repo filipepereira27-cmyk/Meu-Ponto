@@ -73,13 +73,13 @@ export function Detail({ id }: { id: string }) {
       {t.hasProcessedImage && (
         <div className="segmented" role="tablist" aria-label="Imagem">
           <button role="tab" aria-selected={!showProcessed} onClick={() => setShowProcessed(false)}>Original</button>
-          <button role="tab" aria-selected={showProcessed} onClick={() => setShowProcessed(true)}>Recortada</button>
+          <button role="tab" aria-selected={showProcessed} onClick={() => setShowProcessed(true)}>Tratada</button>
         </div>
       )}
       <button className="photo" onClick={() => url && setViewer(true)} aria-label="Ampliar foto do comprovante">
         {url ? <img src={url} alt="Foto do comprovante" /> : <span className="spinner" />}
       </button>
-      <p className="section-footer">{showProcessed ? 'Cópia recortada usada no reconhecimento.' : 'Fotografia original, preservada sem alterações. Toque para ampliar.'}</p>
+      <p className="section-footer">{showProcessed ? 'Cópia recortada, endireitada e com contraste ajustado, usada no reconhecimento.' : 'Fotografia original, preservada sem alterações. Toque para ampliar.'}</p>
 
       <Section>
         <div className="row">

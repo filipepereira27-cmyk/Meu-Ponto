@@ -3,8 +3,8 @@ import { DUPLICATE_REASON_LABEL, diffRecords, duplicatesOf, type DuplicateMatch 
 import { brDate } from '../../core/calendar';
 import { parseTicket } from '../../core/parser';
 import { newId, recordFromParsed, type ParsedTicket } from '../../core/types';
-import { canvasToBlob, cropCanvas, decodeImage, enhanceCanvas, imageHash, rotateCanvas, thumbnail, toCanvas } from '../../services/image';
-import { recognize } from '../../services/ocr';
+import { canvasToBlob, cropCanvas, decodeImage, imageHash, rotateCanvas, thumbnail, toCanvas } from '../../services/image';
+import { readPlainCanvas, readTicketCanvas } from '../../services/ocr';
 import { Confirm, Icon, Notice } from '../components';
 import { useStore } from '../store';
 import { TicketForm, draftToRecord, makeDraft, type Draft } from './TicketForm';
@@ -46,16 +46,24 @@ export function CaptureFlow({ files, fromCamera, onClose }: { files: File[]; fro
   };
 
   async function read(base: HTMLCanvasElement, turns: number, crop: Rect, enhance: boolean) {
-    const processed = cropCanvas(rotateCanvas(base, turns), crop);
+    const cropped = cropCanvas(rotateCanvas(base, turns), crop);
     setStage({ kind: 'reading', progress: 0 });
+    let processed = cropped;
     try {
-      const input = enhanceCanvas(processed, enhance);
-      const lines = await recognize(input, (p) => setStage({ kind: 'reading', progress: p }));
-      if (!lines.length) {
+      let parsed: ParsedTicket;
+      if (enhance) {
+        // Recorte automático só quando o usuário não recortou à mão.
+        const manualCrop = crop.x > 0 || crop.y > 0 || crop.w < 1 || crop.h < 1;
+        const result = await readTicketCanvas(cropped, { autoCrop: !manualCrop, onProgress: (p) => setStage({ kind: 'reading', progress: p }) });
+        processed = result.preparedCanvas;
+        parsed = result.parsed;
+      } else {
+        parsed = parseTicket(await readPlainCanvas(cropped));
+      }
+      if (!parsed.fullText.trim()) {
         setStage({ kind: 'failed', message: 'Nenhum texto foi encontrado. Fotografe com boa luz, sem reflexo, e enquadre o ticket inteiro.', processed });
         return;
       }
-      const parsed = parseTicket(lines);
       const record = recordFromParsed(parsed, { imageHash: imageHash(processed) });
       setStage({ kind: 'review', draft: makeDraft(record, parsed.warnings), parsed, processed, previewURL: processed.toDataURL('image/jpeg', 0.8) });
     } catch {
@@ -215,7 +223,16 @@ function Editor({ base, onDone }: { base: HTMLCanvasElement; onDone: (base: HTML
         </div>
       </div>
       <div className="editor-tools">
-        <p className="small muted center-text">Arraste os cantos para enquadrar só o ticket.</p>
+        <p className="small muted center-text">O ticket é localizado e endireitado automaticamente. Se precisar, arraste os cantos.</p>
+        <details className="small muted tips">
+          <summary>Dicas para uma boa leitura</summary>
+          <ul>
+            <li>Luz uniforme, sem sombra do celular sobre o papel e sem flash refletindo.</li>
+            <li>Ticket esticado sobre uma superfície escura e lisa.</li>
+            <li>Aproxime até o ticket ocupar quase toda a tela, com foco nítido.</li>
+            <li>Tickets térmicos desbotam com o tempo: fotografe logo após a marcação.</li>
+          </ul>
+        </details>
         <div className="tool-row">
           <button type="button" className="tool" onClick={() => rotate(-1)}><Icon name="rotateL" /><span>Girar ←</span></button>
           <button type="button" className="tool" onClick={() => rotate(1)}><Icon name="rotateR" /><span>Girar →</span></button>

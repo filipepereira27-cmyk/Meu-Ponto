@@ -7,9 +7,9 @@ import { resolve } from 'node:path';
 import jpeg from 'jpeg-js';
 import { createWorker, OEM, type Worker } from 'tesseract.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { enhanceForOCR, grayToRGBA, differenceHash, hashDistance, toGray } from '../src/core/imageOps';
-import { parseTicket } from '../src/core/parser';
-import { linesFromBlocks } from '../src/core/ocrLines';
+import { differenceHash, hashDistance, toGray } from '../src/core/imageOps';
+import { readTicket } from '../src/core/ocrPipeline';
+import { recognizer } from './benchmark/harness';
 import { needsConfirmation, type ParsedTicket } from '../src/core/types';
 
 const root = resolve(__dirname, '..');
@@ -27,11 +27,8 @@ function load(name: string) {
 }
 
 async function read(name: string): Promise<ParsedTicket> {
-  const g = enhanceForOCR(load(name));
-  const rgba = grayToRGBA(g);
-  const encoded = jpeg.encode({ width: rgba.width, height: rgba.height, data: Buffer.from(rgba.data) }, 92).data;
-  const { data } = await worker.recognize(Buffer.from(encoded), {}, { blocks: true });
-  return parseTicket(linesFromBlocks(data.blocks), { years: [2000, 2027] });
+  // Mesmo pipeline do navegador: recorte do papel, endireitamento, vários passes.
+  return (await readTicket(load(name), recognizer(worker), { years: [2000, 2027] })).parsed;
 }
 
 /** O valor pode não ser lido, mas nunca pode estar errado sem pedir confirmação. */

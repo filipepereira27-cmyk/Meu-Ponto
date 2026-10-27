@@ -3,7 +3,7 @@ import type { TicketRecord } from '../core/types';
 import { allTickets, deleteImages, getImage, hasImage, imageKey, putImage, putTickets, type ImageKind } from './db';
 import { thumbnail } from './image';
 
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.1.0';
 
 const extOf = (mime: string) => (mime.includes('png') ? 'png' : mime.includes('heic') ? 'heic' : mime.includes('webp') ? 'webp' : 'jpg');
 const pathOf = (r: TicketRecord, kind: 'original' | 'tratada') =>

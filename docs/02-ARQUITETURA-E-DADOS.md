@@ -7,7 +7,8 @@
 | Formato | **PWA** (site instalável) | Acesso por link, sem loja nem Mac; instalável na Tela de Início do iPhone. |
 | Dados | **IndexedDB no aparelho** | Privacidade (sem servidor de dados, sem LGPD de terceiros), grátis, funciona offline. |
 | OCR | **Tesseract.js 7** (WebAssembly), modelo `por` LSTM | Roda no navegador; nada sai do aparelho. Arquivos servidos pelo próprio portal. |
-| Pré-processamento | Cinza → contraste (percentis) → ampliação → binarização adaptativa (Sauvola) | Nas amostras, recuperou o ticket borrado (de 0 para todos os campos). |
+| Pré-processamento | Localiza o papel (cor/brilho + crescimento de região) → recorta → endireita (perfil de projeção, ±20°) → contraste → ampliação → binarização adaptativa (Sauvola) → limpa bordas | Fotos inclinadas passaram de 0% para 100% dos campos. |
+| Leitura | 2–3 passes (binarizada, reforçada contra falhas da impressão térmica, bloco único se faltar data/hora) combinados campo a campo | Concordância reforça a confiança; discordância obriga conferência. |
 | Interface | React 19 + TypeScript, CSS próprio (claro/escuro), rotas por `#` | Leve, funciona em qualquer hospedagem estática. |
 | Offline | Service worker (Workbox): telas pré-carregadas; motor do OCR guardado no primeiro uso | Só a variante do motor usada pelo aparelho é baixada (~4 MB + 1,4 MB do idioma). |
 | PDF | jsPDF | Gerado no aparelho. |
@@ -21,7 +22,9 @@
 src/core/      TypeScript puro, testado em Node (sem navegador)
   parser.ts      linhas do OCR → campos + confiança + avisos
   validators.ts  CNPJ (numérico/alfanumérico), CPF, PIS
-  imageOps.ts    cinza, contraste, redimensionar, Sauvola, rotação, dHash
+  imageOps.ts    cinza, contraste, Sauvola, localização do papel, endireitamento, dHash
+  ocrPipeline.ts leitura em vários passes e combinação dos resultados
+  ocrLines.ts    remonta linhas (inclusive divididas em "colunas" ou em papel curvado)
   archive.ts     busca/filtros, histórico (diff), duplicidades
   workday.ts     jornada diária/mensal, pendências, CSV
   backup.ts      .zip em fluxo + CRC32
@@ -30,7 +33,7 @@ src/services/  navegador: IndexedDB, OCR (Tesseract), canvas, PDF, compartilhar,
 src/ui/        React: store, rotas, telas
 ```
 
-Fluxo de um ticket: arquivo → editor (cópia girada/recortada) → realce → OCR → `parseTicket` → revisão
+Fluxo de um ticket: arquivo → editor (giro/recorte manual opcional) → `readTicket` (recorte automático, endireitamento, 2–3 leituras combinadas) → revisão
 (rascunho com confirmações) → checagem de duplicidade → transação única no IndexedDB com o ticket, a
 **foto original (Blob intacto)**, a cópia recortada e a miniatura.
 

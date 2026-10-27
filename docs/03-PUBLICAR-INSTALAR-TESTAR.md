@@ -43,6 +43,19 @@ Safari não apaga os dados por falta de uso (sites comuns podem ter dados apagad
 | `npm test` | 55 testes: parser (Portarias 671/1510, convencional, borrado, danificado, ambíguo, conflito, formatos de data/hora, CNPJ com erro, CNPJ alfanumérico, ruído), validadores, busca (datas parciais, horários, mês, dia da semana, texto do OCR, 10 mil tickets), filtros, ordem, histórico, duplicidades, jornada (completa, tipos indefinidos, saída ausente, turno noturno, intervalo curto, mês), CSV, backup (ida e volta byte a byte, corrupção, truncado, arquivo estranho), imagem; **OCR real do Tesseract nas fotos de `docs/amostras`** | ✅ 55/55 |
 | `npm run test:e2e` | Portal real no Chromium (390×844): boas-vindas; importar e reconhecer; confirmação obrigatória; duplicidade; 12 buscas; recarregar; edição/histórico; calendário/dia; backup → apagar tudo → restaurar → restaurar de novo; arquivo inválido; **offline com OCR**; jornada; sem erros no console | ✅ (raiz e subpasta) |
 
+**Benchmark de OCR** (`tests/ocr.benchmark.test.ts`, roda no `npm test` e na publicação): 15 fotos
+sintéticas difíceis em `tests/benchmark/` — 5 modelos de ticket (Henry, Control iD, convencional, REP-P
+com CNPJ alfanumérico, NSR na mesma linha) × 3 condições (boa; inclinada 9° com perspectiva e papel
+curvado; desbotada com falhas de impressão, sombra, desfoque e baixa resolução). Metas: ≥ 85% dos
+campos corretos e **zero** valores errados aceitos sem confirmação.
+
+| Versão | Campos corretos | Erros silenciosos |
+|---|---|---|
+| 1.0 (um passe) | 48% | 1 |
+| 1.1 (recorte, endireitamento, vários passes, rótulos tolerantes) | **90%** | **0** |
+
+Relatório campo a campo: `test-results/ocr-benchmark.txt`. Para gerar novas fotos: `python3 scripts/gerar-benchmark.py`.
+
 Nas amostras, o teste confirma que, quando o OCR erra (ex.: lê `22/10/20` em vez de `22/10/26`), o valor
 **nunca passa como confirmado** sem pedir conferência.
 
