@@ -60,6 +60,27 @@ test('fluxo completo do portal', async ({ page, context }) => {
     await expect(page.getByText('tickets arquivados')).toBeVisible();
   });
 
+  await test.step('foto tremida: aviso antes da leitura e opção de fotografar de novo', async () => {
+    await page.getByTestId('files-input').setInputFiles(resolve(import.meta.dirname, 'fixtures/tremida.jpg'));
+    await expect(page.getByText('Esta foto provavelmente não vai ser lida bem')).toBeVisible();
+    await expect(page.getByText(/tremida ou fora de foco/)).toBeVisible();
+    await page.screenshot({ path: `${shots}/12-foto-tremida.png` });
+    // O seletor abre no mesmo toque (exigência do Safari no iPhone).
+    const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Escolher outra foto' }).click()]);
+    await chooser.setFiles([]);
+    await expect(page.getByRole('button', { name: 'Reconhecer texto' })).toHaveCount(0);
+  });
+
+  await test.step('valor conhecido: empresa lida com erro é corrigida pelos tickets confirmados', async () => {
+    await importAndRead(page, '../../tests/e2e/fixtures/empresa-com-erro.jpg');
+    await expect(page.getByText('Ajustes com base nos seus tickets confirmados')).toBeVisible();
+    await expect(page.getByText(/“PADARIA BOM DIA LTOA” corrigido para “PADARIA BOM DIA LTDA”/)).toBeVisible();
+    await expect(page.getByLabel('Empresa')).toHaveValue('PADARIA BOM DIA LTDA');
+    await page.screenshot({ path: `${shots}/13-ajuste-automatico.png`, fullPage: true });
+    await page.getByRole('button', { name: 'Cancelar' }).first().click();
+    await page.getByRole('button', { name: 'Descartar e sair' }).click();
+  });
+
   await test.step('foto repetida: alerta de duplicidade, nada apagado', async () => {
     await importAndRead(page, '04-foto-repetida-do-01.jpg');
     await page.getByRole('button', { name: 'Salvar e confirmar' }).click();

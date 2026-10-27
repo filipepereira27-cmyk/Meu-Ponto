@@ -11,6 +11,8 @@ um app. **Os tickets ficam no próprio aparelho**: não há login, servidor de d
 - ✂️ Recortar, girar e realçar antes do reconhecimento
 - 🔤 OCR **no próprio aparelho** (Tesseract em WebAssembly, português) — funciona sem internet
 - ✅ Confiança por campo; data, horário e tipo duvidosos **exigem confirmação**
+- 📸 Aviso de foto tremida, escura ou distante **antes** da leitura
+- 🧠 Aprende com os tickets confirmados: corrige nomes/empresa/CNPJ e confere a sequência do NSR
 - 🗂️ Busca por `22/10`, `8h01`, `outubro`, `quinta-feira`, empresa, NSR, qualquer texto do ticket
 - 📅 Calendário, dia de trabalho, associação manual de turnos noturnos
 - 🧮 Análise opcional da jornada (sempre como **referência/estimativa**), PDF e CSV
@@ -22,7 +24,7 @@ um app. **Os tickets ficam no próprio aparelho**: não há login, servidor de d
 
 | Verificação | Resultado |
 |---|---|
-| Testes do núcleo (`npm test`): parser, busca, duplicidades, jornada, CSV, backup, **OCR real nas fotos de amostra** | ✅ 56/56 |
+| Testes do núcleo (`npm test`): parser, busca, duplicidades, jornada, CSV, backup, qualidade da foto, aprendizado com tickets confirmados, **OCR real nas fotos de amostra** | ✅ 72/72 |
 | Benchmark de OCR: 15 fotos difíceis (inclinadas, curvadas, desbotadas) | ✅ 90% dos campos corretos, 0 erros aceitos sem confirmação (era 48%) |
 | Teste de ponta a ponta no navegador (`npm run test:e2e`, Chromium em tamanho de iPhone): importar → OCR → revisar → salvar → duplicidade → busca → recarregar → editar/histórico → calendário → backup → apagar → restaurar (2×) → **uso sem internet com OCR** | ✅ passa, sem erros no console, na raiz e em subpasta |
 | Verificação de tipos (`tsc`) e build de produção | ✅ |

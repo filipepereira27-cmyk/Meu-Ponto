@@ -29,6 +29,18 @@ Formatos: `22/10/2026`, `22-10-26`, `22.10.2026`, `2026-10-22`, `22 OUT 2026`, `
 `08:01`, `08:01:33`, `8h01`. Confusões típicas (`O→0`, `l→1`, `S→5`) são corrigidas **com redução de
 confiança**. Vários valores diferentes no mesmo ticket → confiança reduzida e aviso.
 
+**Qualidade da foto** — antes de ler, o portal mede nitidez (horizontal e vertical, pega tremido de
+movimento), luz, reflexo e o tamanho do ticket na foto. Se a leitura tende a falhar, avisa e oferece
+"Tirar outra foto" (limites calibrados com o benchmark: fotos muito tremidas ou com o ticket minúsculo
+não eram lidas).
+
+**Aprendizado com tickets confirmados** — nome, matrícula, empresa, CNPJ e relógio: leitura parecida com
+um valor já confirmado é corrigida para ele (ex.: "LTIA" → "LTDA") e o ajuste é mostrado e registrado no
+histórico; campo ausente é sugerido (destacado para conferência) quando o mesmo valor já foi confirmado
+3+ vezes. O **NSR** é conferido com a data/hora (no mesmo relógio ele só cresce): se não bater, data,
+horário e NSR passam a exigir conferência; sem data lida, o portal indica o período provável. Data no
+futuro e horário posterior ao momento da foto também são apontados. Só tickets confirmados ensinam.
+
 **Revisão** — confiança Alta/Média/Baixa por campo (texto + %, não só cor). Campos críticos duvidosos
 ficam destacados e exigem "Está correto" ou edição. "Salvar e confirmar" só sem pendências; "Salvar para
 revisar depois" sempre. Antes de salvar, verifica duplicidade (mesmo código, mesmo NSR no mesmo REP,
@@ -84,6 +96,7 @@ flowchart TD
 | ![Pendente](telas/03-revisao-pendente.png) Confirmação obrigatória | ![Duplicidade](telas/04-duplicidade.png) Duplicidade | ![Arquivo](telas/06-arquivo.png) Arquivo |
 | ![Detalhe](telas/07-detalhe.png) Detalhe | ![Calendário](telas/08-calendario.png) Calendário | ![Dia](telas/09-dia.png) Dia |
 | ![Jornada](telas/11-jornada.png) Jornada | ![Backup](telas/10-backup.png) Backup | ![Boas-vindas](telas/00-boas-vindas.png) Boas-vindas |
+| ![Foto tremida](telas/12-foto-tremida.png) Aviso de foto ruim | ![Ajuste](telas/13-ajuste-automatico.png) Ajuste por ticket confirmado | |
 
 No navegador de testes (Chromium em inglês) os campos de data/hora aparecem como `10/22/2026` e `PM`;
 no iPhone em português aparecem como `22/10/2026` e 24 h.

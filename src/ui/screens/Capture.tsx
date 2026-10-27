@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
 import { DUPLICATE_REASON_LABEL, diffRecords, duplicatesOf, type DuplicateMatch } from '../../core/archive';
+import { applyKnowledge } from '../../core/knowledge';
+import { assessQuality, type QualityReport } from '../../core/quality';
 import { brDate } from '../../core/calendar';
 import { parseTicket } from '../../core/parser';
 import { newId, recordFromParsed, type ParsedTicket } from '../../core/types';
@@ -20,7 +22,7 @@ interface Rect { x: number; y: number; w: number; h: number }
 const FULL: Rect = { x: 0, y: 0, w: 1, h: 1 };
 
 /** Fluxo de inclusão: ajustar imagem → reconhecer → revisar → salvar. Vários arquivos em fila. */
-export function CaptureFlow({ files, fromCamera, onClose }: { files: File[]; fromCamera: boolean; onClose: () => void }) {
+export function CaptureFlow({ files, fromCamera, onClose, onRetake }: { files: File[]; fromCamera: boolean; onClose: () => void; onRetake: () => void }) {
   const { tickets, addTicket } = useStore();
   const [index, setIndex] = useState(0);
   const [stage, setStage] = useState<Stage>({ kind: 'loading' });
@@ -64,8 +66,11 @@ export function CaptureFlow({ files, fromCamera, onClose }: { files: File[]; fro
         setStage({ kind: 'failed', message: 'Nenhum texto foi encontrado. Fotografe com boa luz, sem reflexo, e enquadre o ticket inteiro.', processed });
         return;
       }
-      const record = recordFromParsed(parsed, { imageHash: imageHash(processed) });
-      setStage({ kind: 'review', draft: makeDraft(record, parsed.warnings), parsed, processed, previewURL: processed.toDataURL('image/jpeg', 0.8) });
+      // Confere e completa com os tickets já confirmados (valores conhecidos, NSR, datas).
+      // O texto e os valores lidos originalmente ficam guardados; os ajustes vão ao histórico.
+      const knowledge = applyKnowledge(parsed, tickets);
+      const record = recordFromParsed(knowledge.parsed, { imageHash: imageHash(processed), ocrSnapshot: parsed });
+      setStage({ kind: 'review', draft: makeDraft(record, knowledge.parsed.warnings, knowledge.adjustments), parsed, processed, previewURL: processed.toDataURL('image/jpeg', 0.8) });
     } catch {
       setStage({
         kind: 'failed', processed,
@@ -101,7 +106,7 @@ export function CaptureFlow({ files, fromCamera, onClose }: { files: File[]; fro
         hasProcessedImage: stage.processed.width > 0,
       };
       final.changes = [
-        { id: newId(), date: now.toISOString(), field: 'Inclusão', oldValue: '—', newValue: `Digitalizado (${name}) e reconhecido por OCR` },
+        { id: newId(), date: now.toISOString(), field: 'Inclusão', oldValue: '—', newValue: `Digitalizado (${name}) e reconhecido por OCR${stage.draft.adjustments.length ? ` — ${stage.draft.adjustments.length} ajuste(s) automático(s) com base em tickets confirmados` : ''}` },
         ...diffRecords(baseline, final, now),
       ];
       const images: Record<string, Blob> = { original: file };
@@ -133,7 +138,8 @@ export function CaptureFlow({ files, fromCamera, onClose }: { files: File[]; fro
       </header>
       <div className="flow-body">
         {stage.kind === 'loading' && <div className="center"><span className="spinner" /> Abrindo imagem…</div>}
-        {stage.kind === 'editing' && <Editor key={index} base={stage.base} onDone={read} />}
+        {stage.kind === 'editing' && <Editor key={index} base={stage.base} onDone={read}
+          onRetake={files.length === 1 ? onRetake : undefined} fromCamera={fromCamera} />}
         {stage.kind === 'reading' && (
           <div className="center stack">
             <span className="spinner" />
@@ -180,7 +186,23 @@ export function CaptureFlow({ files, fromCamera, onClose }: { files: File[]; fro
 }
 
 /** Recorte pelos quatro cantos, giro de 90° e realce. Trabalha numa cópia: o original é preservado. */
-function Editor({ base, onDone }: { base: HTMLCanvasElement; onDone: (base: HTMLCanvasElement, turns: number, crop: Rect, enhance: boolean) => void }) {
+function Editor({ base, onDone, onRetake, fromCamera }: {
+  base: HTMLCanvasElement;
+  onDone: (base: HTMLCanvasElement, turns: number, crop: Rect, enhance: boolean) => void;
+  onRetake?: () => void;
+  fromCamera: boolean;
+}) {
+  // Avaliação da foto antes da leitura (nitidez, luz, tamanho do ticket).
+  const [quality, setQuality] = useState<QualityReport>();
+  useEffect(() => {
+    let alive = true;
+    const t = setTimeout(() => {
+      const small = toCanvas(base, 1600);
+      const report = assessQuality(small.getContext('2d', { willReadFrequently: true })!.getImageData(0, 0, small.width, small.height));
+      if (alive) setQuality(report);
+    }, 50);
+    return () => { alive = false; clearTimeout(t); };
+  }, [base]);
   const [turns, setTurns] = useState(0);
   const [crop, setCrop] = useState<Rect>(FULL);
   const [enhance, setEnhance] = useState(true);
@@ -223,6 +245,19 @@ function Editor({ base, onDone }: { base: HTMLCanvasElement; onDone: (base: HTML
         </div>
       </div>
       <div className="editor-tools">
+        {quality && quality.level !== 'ok' && (
+          <div className={quality.level === 'bad' ? 'notice notice-error quality' : 'notice notice-warn quality'} role="status">
+            <div className="stack-tight">
+              <b>{quality.level === 'bad' ? 'Esta foto provavelmente não vai ser lida bem' : 'A foto pode prejudicar a leitura'}</b>
+              {quality.issues.map((i) => <span key={i.code} className="small">{i.message}</span>)}
+              {onRetake && (
+                <button type="button" className="btn btn-primary btn-small" onClick={onRetake}>
+                  <Icon name={fromCamera ? 'camera' : 'photo'} size={18} /> {fromCamera ? 'Tirar outra foto' : 'Escolher outra foto'}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         <p className="small muted center-text">O ticket é localizado e endireitado automaticamente. Se precisar, arraste os cantos.</p>
         <details className="small muted tips">
           <summary>Dicas para uma boa leitura</summary>

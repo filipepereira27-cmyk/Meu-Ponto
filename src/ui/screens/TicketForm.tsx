@@ -12,16 +12,18 @@ export const SUGGESTED_TAGS = ['Entrada', 'Saída', 'Intervalo', 'Divergência']
 export interface Draft {
   base: TicketRecord;
   warnings: string[];
+  /** Ajustes automáticos feitos com base nos tickets já confirmados. */
+  adjustments: string[];
   record: TicketRecord;
   /** Campos críticos conferidos pelo usuário (ou com confiança alta). */
   confirmed: TicketField[];
 }
 
-export function makeDraft(base: TicketRecord, warnings: string[] = []): Draft {
+export function makeDraft(base: TicketRecord, warnings: string[] = [], adjustments: string[] = []): Draft {
   const confirmed = base.isConfirmed
     ? [...CRITICAL_FIELDS]
     : CRITICAL_FIELDS.filter((f) => (base.fieldConfidences[f] ?? 0) >= CONFIRMATION_THRESHOLD && !(f === 'markType' && base.markType === 'indefinido'));
-  return { base, warnings, record: { ...base }, confirmed };
+  return { base, warnings, adjustments, record: { ...base }, confirmed };
 }
 
 export const pendingConfirmation = (d: Draft, f: TicketField) => CRITICAL_FIELDS.includes(f) && !d.confirmed.includes(f);
@@ -88,6 +90,14 @@ export function TicketForm({ draft, setDraft, ocrText, onSave, saveLabel = 'Salv
   return (
     <form className="form" onSubmit={(e) => e.preventDefault()}>
       {draft.warnings.map((w) => <Notice key={w}>{w}</Notice>)}
+      {draft.adjustments.length > 0 && (
+        <Notice tone="info">
+          <div className="stack-tight">
+            <b>Ajustes com base nos seus tickets confirmados</b>
+            {draft.adjustments.map((a) => <span key={a} className="small">{a}</span>)}
+          </div>
+        </Notice>
+      )}
 
       <h3 className="section-title">Registro</h3>
       <div className="group">

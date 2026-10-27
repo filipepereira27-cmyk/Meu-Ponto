@@ -38,8 +38,10 @@ interface Store {
   removeTicket: (id: string) => Promise<void>;
   removeAll: () => Promise<void>;
   updateSettings: (patch: Partial<AppSettings>) => Promise<void>;
+  /** Abre a câmera ou o seletor de arquivos. Chame diretamente no toque do botão. */
   startCapture: (mode: CaptureMode) => void;
-  captureRequest: { mode: CaptureMode; n: number } | undefined;
+  /** O App registra aqui como abrir os seletores (inputs de arquivo). */
+  registerCapture: (open: (mode: CaptureMode) => void) => void;
   backupOverdue: boolean;
 }
 
@@ -49,7 +51,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [tickets, setTickets] = useState<TicketRecord[]>([]);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
-  const [captureRequest, setCaptureRequest] = useState<Store['captureRequest']>();
+  const captureHandler = useRef<(mode: CaptureMode) => void>(undefined);
   const cache = useRef(new Map<string, { updatedAt: string; text: string }>());
 
   const reload = useCallback(async () => {
@@ -107,17 +109,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const startCapture = useCallback((mode: CaptureMode) => setCaptureRequest((r) => ({ mode, n: (r?.n ?? 0) + 1 })), []);
+  // O Safari do iPhone só abre câmera/arquivos se o clique no input acontecer no mesmo
+  // toque do usuário: por isso a chamada é síncrona (sem passar por estado/efeito).
+  const startCapture = useCallback((mode: CaptureMode) => captureHandler.current?.(mode), []);
+  const registerCapture = useCallback((open: (mode: CaptureMode) => void) => { captureHandler.current = open; }, []);
 
   const value = useMemo<Store>(() => {
     const last = settings.lastBackupAt ? new Date(settings.lastBackupAt).getTime() : 0;
     return {
       ready, tickets, settings, searchText, reload, addTicket, editTicket, removeTicket, removeAll, updateSettings,
-      startCapture, captureRequest,
+      startCapture, registerCapture,
       byId: new Map(tickets.map((t) => [t.id, t])),
       backupOverdue: tickets.length > 0 && Date.now() - last > settings.backupReminderDays * 86_400_000,
     };
-  }, [ready, tickets, settings, searchText, reload, addTicket, editTicket, removeTicket, removeAll, updateSettings, startCapture, captureRequest]);
+  }, [ready, tickets, settings, searchText, reload, addTicket, editTicket, removeTicket, removeAll, updateSettings, startCapture, registerCapture]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

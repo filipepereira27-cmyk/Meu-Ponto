@@ -15,7 +15,7 @@ import { BackupScreen, PrivacyScreen, ScheduleScreen, Settings, StorageScreen } 
 const LOCK_GRACE_MS = 60_000;
 
 export function App({ updateAvailable, onUpdate }: { updateAvailable: boolean; onUpdate: () => void }) {
-  const { ready, settings, captureRequest } = useStore();
+  const { ready, settings, registerCapture, startCapture } = useStore();
   const route = useRoute();
   const [locked, setLocked] = useState<boolean>();
   const [capture, setCapture] = useState<{ files: File[]; fromCamera: boolean }>();
@@ -44,11 +44,10 @@ export function App({ updateAvailable, onUpdate }: { updateAvailable: boolean; o
     return () => clearTimeout(t);
   }, [ready]);
 
-  // Botões "Fotografar" / "Importar" de qualquer tela.
+  // Botões "Fotografar" / "Importar" de qualquer tela abrem os seletores diretamente.
   useEffect(() => {
-    if (!captureRequest) return;
-    (captureRequest.mode === 'camera' ? cameraInput : filesInput).current?.click();
-  }, [captureRequest]);
+    registerCapture((mode) => (mode === 'camera' ? cameraInput : filesInput).current?.click());
+  }, [registerCapture]);
 
   if (!ready || locked === undefined) return <div className="splash"><span className="spinner" /></div>;
   if (locked) return <LockScreen onUnlock={() => setLocked(false)} />;
@@ -89,7 +88,8 @@ export function App({ updateAvailable, onUpdate }: { updateAvailable: boolean; o
       <TabBar current={tab} analysis={settings.analysisEnabled} />
       <input ref={cameraInput} type="file" accept="image/*" capture="environment" hidden onChange={pick(true)} data-testid="camera-input" />
       <input ref={filesInput} type="file" accept="image/*" multiple hidden onChange={pick(false)} data-testid="files-input" />
-      {capture && <CaptureFlow files={capture.files} fromCamera={capture.fromCamera} onClose={() => setCapture(undefined)} />}
+      {capture && <CaptureFlow files={capture.files} fromCamera={capture.fromCamera} onClose={() => setCapture(undefined)}
+        onRetake={() => { const mode = capture.fromCamera ? 'camera' : 'files'; setCapture(undefined); startCapture(mode); }} />}
       <Onboarding />
     </>
   );
