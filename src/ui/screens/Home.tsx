@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { allDuplicates } from '../../core/archive';
-import { MONTH_ABBR, WEEKDAY_SHORT, parseDay, weekday } from '../../core/calendar';
+import { MONTH_ABBR, WEEKDAY_SHORT, brDate, parseDay, today, weekday } from '../../core/calendar';
+import { nextDaysOff, planFor, rotationFor } from '../../core/workday';
 import { isIncomplete } from '../../core/types';
 import { Card, Icon, Page, TicketRow } from '../components';
 import { go } from '../router';
@@ -32,6 +33,8 @@ export function Home() {
         <div className="stat"><b>{tickets.length}</b><span>{tickets.length === 1 ? 'ticket arquivado' : 'tickets arquivados'}</span></div>
         <div className="stat"><b className={pending ? 'tint-orange' : 'tint-green'}>{pending}</b><span>para revisar</span></div>
       </div>
+
+      <ShiftCard />
 
       {attention && (
         <Card title="Precisa da sua atenção" icon="alert">
@@ -111,3 +114,23 @@ function InstallHint() {
 
 function sessionStorageGet(k: string) { try { return sessionStorage.getItem(k); } catch { return null; } }
 function sessionStorageSet(k: string, v: string) { try { sessionStorage.setItem(k, v); } catch { /* ignorado */ } }
+
+/** Hoje (trabalho ou folga) e as próximas folgas, quando há escala configurada. */
+function ShiftCard() {
+  const { settings } = useStore();
+  const t = today();
+  const rotation = rotationFor(settings.schedule, t);
+  if (!rotation) return null;
+  const plan = planFor(settings.schedule, t);
+  const offs = nextDaysOff(settings.schedule, t, 6).filter((d) => d !== t || !plan.off);
+  const fmt = (d: string) => `${WEEKDAY_SHORT[weekday(d)]} ${brDate(d).slice(0, 5)}`;
+  return (
+    <Card title={`Escala ${rotation.label}`} icon="calendar">
+      <div className={plan.off ? 'tint-green' : ''}>
+        <b>Hoje:</b> {plan.off ? 'folga' : `trabalho, ${plan.start} às ${plan.end}`}
+      </div>
+      <div><b>Próximas folgas:</b> <span className="mono">{offs.map(fmt).join(' · ')}</span></div>
+      <a className="link small" href="#/calendario">Ver no calendário</a>
+    </Card>
+  );
+}

@@ -295,3 +295,10 @@ progress { width: 220px; accent-color: var(--accent); }
 
 .tips summary { cursor: pointer; color: var(--accent); min-height: 32px; }
 .tips ul { margin: 4px 0 0; padding-left: 18px; text-align: left; }
+
+/* Folgas */
+.cal-day.off { background: repeating-linear-gradient(135deg, var(--card-2), var(--card-2) 4px, transparent 4px, transparent 8px); color: var(--muted); }
+.cal-day.off.has { background: var(--blue-soft); outline: 2px dashed var(--orange); }
+.off-tag { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: var(--green); }
+.off-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: repeating-linear-gradient(135deg, var(--muted), var(--muted) 2px, transparent 2px, transparent 4px); vertical-align: middle; }
+.notice-off { background: color-mix(in srgb, var(--green) 14%, transparent); }

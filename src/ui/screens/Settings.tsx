@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { WEEKDAY_NAMES, capitalize, formatDuration } from '../../core/calendar';
-import { STANDARD_SCHEDULE } from '../../core/workday';
+import { STANDARD_SCHEDULE, nextDaysOff, rotationFor, shiftMinutes, type RotatingSchedule } from '../../core/workday';
+import { WEEKDAY_SHORT as WD, addDays, brDate, isDayKey, isTimeText, today, weekday } from '../../core/calendar';
+import { routeQuery } from '../router';
 import { ticketsCSV } from '../../core/workday';
 import { APP_VERSION, createBackup, restoreBackup } from '../../services/backup';
 import { storageEstimate } from '../../services/db';
@@ -161,10 +163,18 @@ export function ScheduleScreen() {
   const s = settings.schedule;
   const set = (patch: Partial<typeof s>) => updateSettings({ schedule: { ...s, ...patch } });
   const step = (value: number, delta: number, max: number) => Math.min(max, Math.max(0, value + delta));
+  const current = rotationFor(s, '9999-12-31');
 
   return (
     <Page title="Jornada de referência" backTo="ajustes">
-      <Section title="Horas previstas por dia" footer="Informe a jornada do seu contrato ou acordo. Ela serve só como referência para comparar com os tickets.">
+      <RotationEditor
+        current={current}
+        onSave={(r) => set({ rotations: [...(s.rotations ?? []).filter((x) => x.validFrom !== r.validFrom), r] })}
+        onRemove={(r) => set({ rotations: (s.rotations ?? []).filter((x) => x.validFrom !== r.validFrom) })}
+      />
+
+      <Section title={current ? `Jornada semanal (vale antes de ${brDate(current.validFrom)})` : 'Horas previstas por dia'}
+        footer="Informe a jornada do seu contrato ou acordo. Ela serve só como referência para comparar com os tickets.">
         {s.expectedMinutesByWeekday.map((m, i) => (
           <div className="row" key={i}>
             <span className="grow">{capitalize(WEEKDAY_NAMES[i])}</span>
@@ -180,9 +190,94 @@ export function ScheduleScreen() {
         <div className="row"><span className="grow">Esperado em jornadas acima de</span>
           <Stepper label="limite" text={formatDuration(s.breakRequiredAfterMinutes)} onMinus={() => set({ breakRequiredAfterMinutes: step(s.breakRequiredAfterMinutes, -30, 720) })} onPlus={() => set({ breakRequiredAfterMinutes: step(s.breakRequiredAfterMinutes, 30, 720) })} /></div>
       </Section>
-      <button className="btn btn-secondary" onClick={() => updateSettings({ schedule: STANDARD_SCHEDULE })}>Restaurar padrão (8h de segunda a sexta)</button>
+      <button className="btn btn-secondary" onClick={() => updateSettings({ schedule: { ...STANDARD_SCHEDULE, rotations: s.rotations } })}>Restaurar jornada semanal padrão (8h de segunda a sexta)</button>
     </Page>
   );
+}
+
+/**
+ * Escala de revezamento (6x2, 5x1, 12x36…). Pode vir pré-preenchida pelo endereço:
+ * #/ajustes/jornada?escala=6x2&letra=B&inicio=2026-10-26&folga=2026-10-29&entrada=06:00&saida=14:35&intervalo=60
+ */
+function RotationEditor({ current, onSave, onRemove }: {
+  current?: RotatingSchedule; onSave: (r: RotatingSchedule) => void; onRemove: (r: RotatingSchedule) => void;
+}) {
+  const [form, setForm] = useState(() => initialForm(current));
+  const [saved, setSaved] = useState(false);
+  const fromLink = routeQuery().has('escala');
+  const [work, off] = form.pattern.split('x').map(Number);
+  const errors: string[] = [];
+  if (!(work > 0 && off > 0)) errors.push('Escala no formato trabalho x folga, ex.: 6x2.');
+  if (!isDayKey(form.validFrom)) errors.push('Informe o início da escala.');
+  if (!isDayKey(form.firstOffDay)) errors.push('Informe um dia de folga da escala.');
+  if (!isTimeText(form.start) || !isTimeText(form.end)) errors.push('Informe os horários de entrada e saída.');
+  const draft: RotatingSchedule | undefined = errors.length ? undefined : {
+    label: `${work}x${off}${form.letter.trim() ? ` — Letra ${form.letter.trim().toUpperCase()}` : ''}`,
+    validFrom: form.validFrom, workDays: work, offDays: off, firstOffDay: form.firstOffDay,
+    start: form.start, end: form.end, breakMinutes: form.breakMinutes,
+  };
+  const preview = draft ? nextDaysOff({ ...STANDARD_SCHEDULE, rotations: [draft] }, maxDay(today(), draft.validFrom), 8) : [];
+  const unchanged = !!current && !!draft && JSON.stringify(current) === JSON.stringify(draft);
+
+  return (
+    <Section title="Escala de revezamento"
+      footer="Para escalas como 6x2: informe um dia em que você folgou (ou vai folgar) e o portal calcula todas as folgas, para frente e para trás. Antes do início da escala vale a jornada semanal abaixo.">
+      {fromLink && !current && <div className="row tint-orange small">Confira os dados abaixo e toque em “Salvar escala”.</div>}
+      {current && <div className="row"><span className="grow"><b>Atual:</b> {current.label}, {current.start}–{current.end}, desde {brDate(current.validFrom)}</span></div>}
+      <label className="field-label row">Escala (trabalho x folga)
+        <input className="input input-inline" inputMode="numeric" value={form.pattern} onChange={(e) => setForm({ ...form, pattern: e.target.value.replace(/[^0-9x]/gi, '').toLowerCase() })} aria-label="Escala" /></label>
+      <label className="field-label row">Letra / grupo
+        <input className="input input-inline" value={form.letter} maxLength={3} onChange={(e) => setForm({ ...form, letter: e.target.value })} aria-label="Letra da folga" /></label>
+      <label className="field-label row">Início da escala
+        <input className="input input-inline" type="date" value={form.validFrom} onChange={(e) => setForm({ ...form, validFrom: e.target.value })} aria-label="Início da escala" /></label>
+      <label className="field-label row">Um dia de folga (1º do par)
+        <input className="input input-inline" type="date" value={form.firstOffDay} onChange={(e) => setForm({ ...form, firstOffDay: e.target.value })} aria-label="Primeiro dia de folga" /></label>
+      <label className="field-label row">Entrada
+        <input className="input input-inline" type="time" value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} aria-label="Entrada" /></label>
+      <label className="field-label row">Saída
+        <input className="input input-inline" type="time" value={form.end} onChange={(e) => setForm({ ...form, end: e.target.value })} aria-label="Saída" /></label>
+      <div className="row"><span className="grow">Intervalo dentro do turno</span>
+        <Stepper label="intervalo do turno" text={formatDuration(form.breakMinutes)}
+          onMinus={() => setForm({ ...form, breakMinutes: Math.max(0, form.breakMinutes - 5) })}
+          onPlus={() => setForm({ ...form, breakMinutes: Math.min(180, form.breakMinutes + 5) })} /></div>
+      {draft && (
+        <div className="field">
+          <span className="small muted">Previsto por dia de trabalho: <b>{formatDuration(shiftMinutes(draft))}</b> ({draft.start}–{draft.end} menos {formatDuration(draft.breakMinutes)} de intervalo)</span>
+          <span className="small"><b>Próximas folgas:</b> {preview.map((d) => `${WD[weekday(d)]} ${brDate(d).slice(0, 5)}`).join(' · ')}</span>
+        </div>
+      )}
+      {errors.map((e) => <div key={e} className="row small tint-orange">! {e}</div>)}
+      <button className="row link-row" disabled={!draft || unchanged}
+        onClick={() => { if (draft) { onSave(draft); setSaved(true); } }}>Salvar escala</button>
+      {saved && <div className="row small tint-green">Escala salva. As folgas aparecem no Calendário.</div>}
+      {current && <button className="row link-row tint-red" onClick={() => { onRemove(current); setForm(initialForm(undefined)); setSaved(false); }}>Remover escala</button>}
+    </Section>
+  );
+}
+
+const maxDay = (a: string, b: string) => (a > b ? a : b);
+
+function initialForm(current?: RotatingSchedule) {
+  const q = routeQuery();
+  if (q.has('escala')) {
+    const time = (v: string | null, d: string) => (v && isTimeText(v) ? v : d);
+    return {
+      pattern: (q.get('escala') ?? '6x2').toLowerCase(),
+      letter: q.get('letra') ?? '',
+      validFrom: q.get('inicio') ?? today(),
+      firstOffDay: q.get('folga') ?? '',
+      start: time(q.get('entrada'), '08:00'),
+      end: time(q.get('saida'), '17:00'),
+      breakMinutes: Number(q.get('intervalo') ?? 60) || 0,
+    };
+  }
+  if (current) {
+    return {
+      pattern: `${current.workDays}x${current.offDays}`, letter: current.label.match(/Letra (\S+)/)?.[1] ?? '',
+      validFrom: current.validFrom, firstOffDay: current.firstOffDay, start: current.start, end: current.end, breakMinutes: current.breakMinutes,
+    };
+  }
+  return { pattern: '6x2', letter: '', validFrom: today(), firstOffDay: addDays(today(), 6), start: '08:00', end: '17:00', breakMinutes: 60 };
 }
 
 function Stepper({ text, onMinus, onPlus, label }: { text: string; onMinus: () => void; onPlus: () => void; label: string }) {

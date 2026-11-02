@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 /** Rotas por hash (#/arquivo): funcionam em qualquer hospedagem estática. */
 export function useRoute(): string[] {
-  const read = () => decodeURIComponent(location.hash.replace(/^#\/?/, '')).split('/').filter(Boolean);
+  const read = () => decodeURIComponent(location.hash.replace(/^#\/?/, '').split('?')[0]).split('/').filter(Boolean);
   const [parts, setParts] = useState(read);
   useEffect(() => {
     const on = () => {
@@ -22,4 +22,10 @@ export function go(path: string): void {
 export function back(fallback = ''): void {
   if (history.length > 1) history.back();
   else go(fallback);
+}
+
+/** Parâmetros após "?" no endereço (ex.: #/ajustes/jornada?escala=6x2). */
+export function routeQuery(): URLSearchParams {
+  const q = location.hash.split('?')[1];
+  return new URLSearchParams(q ?? '');
 }

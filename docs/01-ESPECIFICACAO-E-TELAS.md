@@ -58,6 +58,14 @@ original, imprimir, excluir (com confirmação).
 **Calendário e dia** — grade mensal com contagem e alerta de revisão; dia com marcações, tempo entre
 elas, resumo e associação manual de jornada ("Pertence à jornada de dd/mm" para turnos noturnos).
 
+**Escala de revezamento** — além da jornada semanal, o portal aceita escalas como 6x2, 5x1 e 12x36
+(Ajustes › Jornada de referência): dias de trabalho × folga, letra/grupo, data de início, um dia de folga
+conhecido (âncora do ciclo), horário de entrada/saída e intervalo. As folgas aparecem no Calendário
+(hachuradas, "FOLGA"), com a lista do mês; o dia mostra "Folga prevista" ou o horário previsto; a tela
+inicial mostra hoje e as próximas folgas; a análise usa o previsto da escala e não cobra ticket em folga.
+Antes da data de início continua valendo a jornada semanal. Pode ser pré-preenchida por link:
+`#/ajustes/jornada?escala=6x2&letra=B&inicio=AAAA-MM-DD&folga=AAAA-MM-DD&entrada=06:00&saida=14:35&intervalo=60`.
+
 **Jornada (opcional)** — períodos só com tipos confirmados; pendências (início sem fim, fim sem início,
 início duplicado, número ímpar, intervalo abaixo da referência); resumo mensal só com dias sem pendências;
 dias úteis sem ticket; PDF e CSV; jornada de referência por dia da semana.
@@ -96,7 +104,7 @@ flowchart TD
 | ![Pendente](telas/03-revisao-pendente.png) Confirmação obrigatória | ![Duplicidade](telas/04-duplicidade.png) Duplicidade | ![Arquivo](telas/06-arquivo.png) Arquivo |
 | ![Detalhe](telas/07-detalhe.png) Detalhe | ![Calendário](telas/08-calendario.png) Calendário | ![Dia](telas/09-dia.png) Dia |
 | ![Jornada](telas/11-jornada.png) Jornada | ![Backup](telas/10-backup.png) Backup | ![Boas-vindas](telas/00-boas-vindas.png) Boas-vindas |
-| ![Foto tremida](telas/12-foto-tremida.png) Aviso de foto ruim | ![Ajuste](telas/13-ajuste-automatico.png) Ajuste por ticket confirmado | |
+| ![Foto tremida](telas/12-foto-tremida.png) Aviso de foto ruim | ![Ajuste](telas/13-ajuste-automatico.png) Ajuste por ticket confirmado | ![Escala](telas/15-calendario-folgas.png) Folgas da escala |
 
 No navegador de testes (Chromium em inglês) os campos de data/hora aparecem como `10/22/2026` e `PM`;
 no iPhone em português aparecem como `22/10/2026` e 24 h.

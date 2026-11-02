@@ -3,12 +3,12 @@ import {
   WEEKDAY_NAMES, WEEKDAY_SHORT, addDays, addMonths, brDate, capitalize, daysOfMonth, formatDuration, hhmm, monthName, monthOf, parseDay, today, weekday,
 } from '../../core/calendar';
 import { chronological, needsReview, workdayOf, type TicketRecord } from '../../core/types';
-import { balanceOf, isEstimate, issueMessage, summarizeDay, type WorkdaySummary } from '../../core/workday';
+import { balanceOf, isEstimate, issueMessage, planFor, rotationFor, summarizeDay, type WorkdaySummary } from '../../core/workday';
 import { Card, Icon, MarkBadge, Notice, Page, Section, TicketRow } from '../components';
 import { useStore } from '../store';
 
 export function CalendarScreen() {
-  const { tickets } = useStore();
+  const { tickets, settings } = useStore();
   const [month, setMonth] = useState(monthOf(today()));
   const t = today();
   const byDay = useMemo(() => {
@@ -40,15 +40,21 @@ export function CalendarScreen() {
         {days.map((d) => {
           const list = byDay.get(d) ?? [];
           const pending = list.filter(needsReview).length;
+          const off = planFor(settings.schedule, d).off;
           const { day } = parseDay(d);
-          const label = `${day} de ${monthName(month).split(' ')[0]}${list.length ? `, ${list.length} ticket(s)${pending ? `, ${pending} para revisar` : ''}` : ', sem tickets'}`;
-          const cls = `cal-day${list.length ? ' has' : ''}${d === t ? ' today' : ''}`;
-          return list.length
-            ? <a key={d} className={cls} href={`#/dia/${d}`} aria-label={label}><span>{day}</span><span className="count">{list.length}</span>{pending > 0 && <span className="pend">!</span>}</a>
-            : <span key={d} className={cls} aria-label={label}><span>{day}</span></span>;
+          const label = `${day} de ${monthName(month).split(' ')[0]}${off ? ', folga' : ''}${list.length ? `, ${list.length} ticket(s)${pending ? `, ${pending} para revisar` : ''}` : ', sem tickets'}`;
+          const cls = `cal-day${list.length ? ' has' : ''}${off ? ' off' : ''}${d === t ? ' today' : ''}`;
+          return (
+            <a key={d} className={cls} href={`#/dia/${d}`} aria-label={label}>
+              <span>{day}</span>
+              {list.length > 0 ? <span className="count">{list.length}</span> : off ? <span className="off-tag">Folga</span> : null}
+              {pending > 0 && <span className="pend">!</span>}
+            </a>
+          );
         })}
       </div>
-      <p className="legend small muted"><span className="dot" /> Com tickets &nbsp; <span className="tint-orange">!</span> Precisa de revisão</p>
+      <p className="legend small muted"><span className="dot" /> Com tickets &nbsp; <span className="off-dot" /> Folga prevista &nbsp; <span className="tint-orange">!</span> Precisa de revisão</p>
+      <OffDaysCard month={month} />
 
       {withTickets.length > 0 && (
         <Card title={`Dias com tickets em ${monthName(month)}`}>
@@ -73,8 +79,14 @@ export function DayScreen({ day }: { day: string }) {
   const summary = summarizeDay(day, journey, settings.schedule);
   const associate = (r: TicketRecord, to?: string) => editTicket({ ...r, journeyDate: to });
 
+  const plan = planFor(settings.schedule, day);
   return (
     <Page title={brDate(day)} backTo="calendario">
+      <div className={plan.off ? 'notice notice-off' : 'notice notice-info'} role="status">
+        {plan.off
+          ? <span><b>Folga prevista</b>{plan.rotation ? ` — escala ${plan.rotation.label}` : ''}.{journey.length > 0 ? ' Há marcações neste dia de folga.' : ''}</span>
+          : <span><b>Dia de trabalho</b>{plan.start ? ` — previsto ${plan.start} às ${plan.end}` : ''} ({formatDuration(plan.expectedMinutes)}{plan.rotation ? `, escala ${plan.rotation.label}` : ''}).</span>}
+      </div>
       <Section title={`Marcações (${journey.length})`}
         footer="Turno que atravessa a meia-noite? Use “Pertence à jornada anterior” no ticket da madrugada.">
         {journey.map((r) => (
@@ -127,3 +139,17 @@ export function DaySummary({ summary: s }: { summary: WorkdaySummary }) {
   );
 }
 
+
+/** Lista as folgas do mês exibido (escala ou jornada semanal). */
+function OffDaysCard({ month }: { month: string }) {
+  const { settings } = useStore();
+  const days = daysOfMonth(month).filter((d) => planFor(settings.schedule, d).off);
+  const rotation = rotationFor(settings.schedule, days.at(-1) ?? `${month}-28`);
+  if (!days.length) return null;
+  return (
+    <Card title={`Folgas em ${monthName(month)}`} icon="calendar">
+      <p className="mono">{days.map((d) => `${WEEKDAY_SHORT[weekday(d)]} ${d.slice(8)}`).join(' · ')}</p>
+      <p className="small muted">{rotation ? `Escala ${rotation.label}, ${rotation.start}–${rotation.end}.` : 'Pela jornada semanal configurada.'} <a href="#/ajustes/jornada">Alterar</a></p>
+    </Card>
+  );
+}

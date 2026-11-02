@@ -1,8 +1,29 @@
 import {
-  WEEKDAY_NAMES, WEEKDAY_SHORT, brDate, daysBetween, daysOfMonth, formatDuration, minutesOf, monthOf, weekday,
+  WEEKDAY_NAMES, WEEKDAY_SHORT, addDays, brDate, daysBetween, daysOfMonth, formatDuration, minutesOf, monthOf, weekday,
   type DayKey, type MonthKey, type TimeText,
 } from './calendar';
 import { MARK_LABEL, endsWork, startsWork, workdayOf, type MarkType, type TicketRecord } from './types';
+
+/**
+ * Escala de revezamento (ex.: 6x2): ciclos de N dias de trabalho e M de folga,
+ * válida a partir de uma data. A posição no ciclo é ancorada no primeiro dia de uma
+ * folga conhecida, então a escala vale para frente e para trás sem acumular erro.
+ */
+export interface RotatingSchedule {
+  /** Ex.: "6x2 — Letra B". */
+  label: string;
+  /** Primeiro dia em que a escala vale (antes dela vale a jornada semanal). */
+  validFrom: DayKey;
+  workDays: number;
+  offDays: number;
+  /** Primeiro dia de um bloco de folga (âncora do ciclo). */
+  firstOffDay: DayKey;
+  /** Horário previsto de entrada e saída. */
+  start: TimeText;
+  end: TimeText;
+  /** Intervalo previsto dentro do turno (minutos). */
+  breakMinutes: number;
+}
 
 /** Jornada de referência configurada pelo usuário (apenas para comparação). */
 export interface WorkSchedule {
@@ -10,6 +31,8 @@ export interface WorkSchedule {
   expectedMinutesByWeekday: number[];
   minimumBreakMinutes: number;
   breakRequiredAfterMinutes: number;
+  /** Escalas de revezamento, cada uma valendo a partir da sua data. */
+  rotations?: RotatingSchedule[];
 }
 
 export const STANDARD_SCHEDULE: WorkSchedule = {
@@ -17,6 +40,53 @@ export const STANDARD_SCHEDULE: WorkSchedule = {
   minimumBreakMinutes: 60,
   breakRequiredAfterMinutes: 360,
 };
+
+/** O que está previsto para um dia. */
+export interface DayPlan {
+  off: boolean;
+  expectedMinutes: number;
+  start?: TimeText;
+  end?: TimeText;
+  /** Escala que definiu o dia (ausente = jornada semanal). */
+  rotation?: RotatingSchedule;
+}
+
+export const shiftMinutes = (r: Pick<RotatingSchedule, 'start' | 'end' | 'breakMinutes'>) => {
+  let span = minutesOf(r.end) - minutesOf(r.start);
+  if (span <= 0) span += 1440; // turno que passa da meia-noite
+  return Math.max(0, span - r.breakMinutes);
+};
+
+/** Escala vigente num dia (a de data de início mais recente que já começou). */
+export function rotationFor(s: WorkSchedule, day: DayKey): RotatingSchedule | undefined {
+  return [...(s.rotations ?? [])].filter((r) => r.validFrom <= day).sort((a, b) => (a.validFrom < b.validFrom ? 1 : -1))[0];
+}
+
+export function isRotationOff(r: RotatingSchedule, day: DayKey): boolean {
+  const cycle = r.workDays + r.offDays;
+  const pos = ((daysBetween(r.firstOffDay, day) % cycle) + cycle) % cycle;
+  return pos < r.offDays;
+}
+
+export function planFor(s: WorkSchedule, day: DayKey): DayPlan {
+  const r = rotationFor(s, day);
+  if (r) {
+    const off = isRotationOff(r, day);
+    return off ? { off, expectedMinutes: 0, rotation: r } : { off, expectedMinutes: shiftMinutes(r), start: r.start, end: r.end, rotation: r };
+  }
+  const minutes = s.expectedMinutesByWeekday[weekday(day)];
+  return { off: minutes === 0, expectedMinutes: minutes };
+}
+
+/** Próximos dias de folga a partir de `from` (inclusive). */
+export function nextDaysOff(s: WorkSchedule, from: DayKey, count: number, horizon = 120): DayKey[] {
+  const out: DayKey[] = [];
+  for (let i = 0; i < horizon && out.length < count; i++) {
+    const d = addDays(from, i);
+    if (planFor(s, d).off) out.push(d);
+  }
+  return out;
+}
 
 export interface WorkdayMark {
   ticketId: string;
@@ -124,7 +194,7 @@ export function summarizeDay(day: DayKey, records: TicketRecord[], schedule: Wor
   }
   return {
     date: day, marks, gaps, periods, breaks, workedMinutes: worked,
-    expectedMinutes: schedule.expectedMinutesByWeekday[weekday(day)], issues,
+    expectedMinutes: planFor(schedule, day).expectedMinutes, issues,
   };
 }
 
@@ -162,7 +232,7 @@ export function summarizeMonth(month: MonthKey, records: TicketRecord[], schedul
     daysWithoutCalculation: days.filter((d) => d.workedMinutes === undefined).length,
     // "Sem ticket" só considera dias que já passaram.
     expectedDaysWithoutTickets: daysOfMonth(month).filter((d) =>
-      schedule.expectedMinutesByWeekday[weekday(d)] > 0 && !withTickets.has(d) && (!today || d < today)),
+      !planFor(schedule, d).off && !withTickets.has(d) && (!today || d < today)),
   };
 }
 
@@ -204,7 +274,12 @@ export function workdaysCSV(days: WorkdaySummary[]): string {
   );
 }
 
-export function scheduleDescription(s: WorkSchedule): string {
+export function scheduleDescription(s: WorkSchedule, day?: DayKey): string {
+  const r = day ? rotationFor(s, day) : [...(s.rotations ?? [])].sort((a, b) => (a.validFrom < b.validFrom ? 1 : -1))[0];
+  if (r) {
+    return `Escala ${r.label} desde ${brDate(r.validFrom)}: ${r.workDays} dias de trabalho e ${r.offDays} de folga, `
+      + `${r.start}–${r.end} com ${formatDuration(r.breakMinutes)} de intervalo (${formatDuration(shiftMinutes(r))} previstas por dia)`;
+  }
   const days = s.expectedMinutesByWeekday.map((m, i) => (m > 0 ? `${WEEKDAY_SHORT[i]} ${formatDuration(m)}` : '')).filter(Boolean);
   return `${days.join(', ')}; intervalo de referência ${formatDuration(s.minimumBreakMinutes)}`;
 }

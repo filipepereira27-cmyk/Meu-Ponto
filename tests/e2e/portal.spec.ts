@@ -4,6 +4,17 @@ import { resolve } from 'node:path';
 const sample = (name: string) => resolve(import.meta.dirname, '../../docs/amostras', name);
 const shots = resolve(import.meta.dirname, '../../docs/telas');
 
+const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+/** Navega o calendário até o mês pedido (o teste pode rodar em qualquer data). */
+async function goToMonth(page: Page, month: number, year: number) {
+  for (let i = 0; i < 36; i++) {
+    const [m, y] = (await page.locator('.month-title').textContent())!.toLowerCase().split(' de ');
+    const diff = (year - Number(y)) * 12 + (month - 1 - MONTHS.indexOf(m));
+    if (diff === 0) return;
+    await page.getByRole('button', { name: diff > 0 ? 'Próximo mês' : 'Mês anterior' }).click();
+  }
+}
+
 async function importAndRead(page: Page, file: string) {
   await page.getByTestId('files-input').setInputFiles(sample(file));
   await expect(page.getByRole('button', { name: 'Reconhecer texto' })).toBeVisible();
@@ -129,6 +140,7 @@ test('fluxo completo do portal', async ({ page, context }) => {
 
   await test.step('calendário e dia', async () => {
     await page.getByRole('link', { name: 'Calendário' }).click();
+    await goToMonth(page, 10, 2026);
     await page.screenshot({ path: `${shots}/08-calendario.png` });
     await page.getByRole('link', { name: /^22 de outubro, 2 ticket/ }).click();
     await expect(page.getByText('Resumo da jornada')).toBeVisible();
@@ -184,6 +196,29 @@ test('fluxo completo do portal', async ({ page, context }) => {
     await page.getByRole('button', { name: 'Salvar e confirmar' }).click();
     await expect(page.locator('.stat b').first()).toHaveText('3');
     await context.setOffline(false);
+  });
+
+  await test.step('escala 6x2 (Letra B) pelo link pré-preenchido e folgas no calendário', async () => {
+    await page.goto('./#/ajustes/jornada?escala=6x2&letra=B&inicio=2026-10-26&folga=2026-10-29&entrada=06:00&saida=14:35&intervalo=60');
+    await page.reload();
+    await expect(page.getByText('Confira os dados abaixo')).toBeVisible();
+    await expect(page.getByText(/Previsto por dia de trabalho: 7h35/)).toBeVisible();
+    await page.getByRole('button', { name: 'Salvar escala' }).click();
+    await expect(page.getByText('Escala salva.')).toBeVisible();
+    await expect(page.getByText('Atual: 6x2 — Letra B, 06:00–14:35, desde 26/10/2026')).toBeVisible();
+    await page.screenshot({ path: `${shots}/14-escala.png`, fullPage: true });
+
+    await page.goto('./#/calendario');
+    await goToMonth(page, 11, 2026);
+    for (const d of [6, 7, 14, 15, 22, 23, 30]) await expect(page.getByRole('link', { name: new RegExp(`^${d} de novembro, folga`) })).toBeVisible();
+    for (const d of [2, 5, 8, 13]) await expect(page.getByRole('link', { name: new RegExp(`^${d} de novembro, sem`) })).toBeVisible();
+    await expect(page.getByText('Folgas em novembro de 2026')).toBeVisible();
+    await page.screenshot({ path: `${shots}/15-calendario-folgas.png`, fullPage: true });
+
+    await page.getByRole('link', { name: /^6 de novembro, folga/ }).click();
+    await expect(page.getByText(/Folga prevista — escala 6x2 — Letra B/)).toBeVisible();
+    await page.goto('./#/dia/2026-11-02');
+    await expect(page.getByText(/previsto 06:00 às 14:35 \(7h35, escala 6x2 — Letra B\)/)).toBeVisible();
   });
 
   await test.step('jornada', async () => {
